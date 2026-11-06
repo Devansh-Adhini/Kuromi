@@ -1,0 +1,83 @@
+/* Dark Kuromi corner. Base layout lives in styles.css. */
+:root { color-scheme: dark; color: #eee5f5; --paper:#19161f; --soft:#26202e; --line:#3a3045; --ink:#f1e7f7; --muted:#b6a4c2; --purple:#c5a2dd; --pink:#ed93c1; }
+.panel { background:#19161f; border-color:#4b3859; box-shadow:0 12px 35px #0007; }
+.panel-header { padding:13px 17px; gap:10px; background:#221b2b; }
+.brand-mark { width:33px; height:35px; font-size:24px; border-radius:10px; background:#382440; color:#f1a6ce; box-shadow:none; }
+h1 { margin:0; font-size:17px; color:#f7eefc; }
+.close { width:32px; height:32px; margin-top:0; margin-right:-5px; color:#baa3c8; }
+.tabs { height:42px; padding-inline:10px; gap:1px; border-color:#352a40; background:#1f1928; }
+.tab { padding-inline:5px; font-size:10.5px; gap:4px; color:#b7a4c2; }
+.tab.active { color:#f0a4ce; border-color:#df8dbd; background:#302037; }
+.tab:hover { color:#fff0fa; background:#30263a; }
+.panel-content { height:348px; scrollbar-color:#60466e transparent; }
+.view { padding:17px 20px; }
+.section-heading { margin-bottom:15px; }
+.section-heading h2 { font-size:22px; margin-top:0; color:#f3e7fa; }
+.section-heading p, .field-label, .mood-label { font-size:11px; color:#b9a6c6; }
+input:not([type=checkbox]):not([type=range]),textarea,select,.ai-connection select { background:#241e2d; border:1px solid #4a3858; color:#f1e5fa; font-size:12px; }
+input::placeholder,textarea::placeholder { color:#a18cae; font-size:11px; }
+input:focus,textarea:focus,select:focus { border-color:#cf88b8; }
+.primary { min-height:32px; font-size:11px; background:#8b4f85; color:#fff6fd; box-shadow:none; }
+.primary:hover { background:#a25d98; }
+.secondary { min-height:30px; font-size:10px; background:#302539; border:1px solid #574161; color:#e1c9ee; }
+.text-button { min-height:26px; font-size:10px; color:#d4acdf; }
+.list-heading { font-size:8px; letter-spacing:.7px; color:#b4a0c1; }
+.todo-entry { background:#251c2f; border-color:#5b416c; }
+.todo-check { width:24px; height:24px; border:1px solid #715783; background:#292132; border-radius:7px; font-size:13px; color:#f4d6ec; }
+.todo-entry.done .todo-check { background:#804574; border-color:#c779ac; }
+.todo-text,.thought-entry p { font-size:12px; color:#e6d9ef; }
+.todo-entry.done .todo-text { color:#bca7c8; }
+.delete-button { width:28px; min-height:28px; padding:0; font-size:17px; color:#e7afd4; background:transparent; opacity:1; }
+.thought-entry { background:#231b2b; border-color:#403049; }
+.thought-meta { font-size:10px; color:#b79ac8; }
+.mood-tag { font-size:9px; background:#372840; color:#dfb9dd; }
+.empty-state { font-size:11px; color:#c7b4d3; background:transparent; border-color:#60496f; }
+.mood-label select { background:#30233d; color:#f5eafa; border:1px solid #725287; }
+.tab-count { background:#593561; color:#ffdef0; }
+.about-note span { color:#bca7ca; }
+.setting { padding-block:12px; border-color:#35293f; }
+.setting strong { font-size:12px; color:#e9daF2; }
+.setting small,.about-note { font-size:9px; color:#ac96ba; }
+.setting input[type=checkbox] { background:#55425e; }
+.setting input:checked { background:#a06193; }
+.size-setting input { accent-color:#c58ab7; }
+.window-actions { margin-top:15px; }
+.window-actions .secondary { background:#302539; color:#e4cce9; border-color:#574161; }
+.showing-chat .panel-content { overflow:hidden; }
+.chat-view { height:100%; display:flex; flex-direction:column; gap:10px; padding:10px 17px 12px; }
+.chat-toolbar { display:flex; justify-content:flex-end; flex-shrink:0; }
+#new-chat { padding:5px 10px; }
+.chat-log { flex:1; min-height:0; overflow-y:auto; scrollbar-width:thin; scrollbar-color:#60466e transparent; padding:0 3px 2px; user-select:text; }
+.chat-message { border:1px solid #44304f; background:#251c2f; border-radius:12px 12px 12px 3px; padding:11px 13px; margin:0 22px 10px 0; }
+.chat-message.user { margin:0 0 10px 22px; border-radius:12px 12px 3px 12px; background:#38253e; border-color:#67456c; }
+.message-author { font-size:8px; font-weight:650; letter-spacing:1.25px; color:#e1a3cb; }
+#greeting-date { font-size:8px; color:#af93c0; letter-spacing:.7px; }
+.chat-message p { margin:5px 0 0; color:#eadcf2; font-size:12px; line-height:1.75; white-space:pre-wrap; overflow-wrap:anywhere; }
+.message-note { display:block; color:#b79bc5; font-size:9px; line-height:1.5; margin-top:7px; }
+.message-note:empty { display:none; }
+.streaming { border-color:#bd80b0; }
+.streaming p:after { content:''; display:inline-block; vertical-align:-.1em; width:2px; height:12px; margin-left:3px; background:#e69bc8; animation:cursor-pulse 1s ease-in-out infinite; }
+.chat-connect-note { flex-shrink:0; display:flex; align-items:center; justify-content:space-between; font-size:10px; color:#bea6cc; padding:0 3px; gap:9px; }
+.chat-compose { flex-shrink:0; border-top:1px solid #392c43; padding-top:10px; }
+.chat-compose textarea { min-height:58px; max-height:90px; resize:none; padding:9px 11px; }
+.chat-compose-actions { display:flex; justify-content:flex-end; align-items:center; gap:7px; margin-top:6px; }
+#chat-send { padding:6px 11px; }
+.ai-connection { border-bottom:1px solid #392c43; margin-bottom:17px; padding-bottom:16px; }
+.connection-heading { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.connection-heading strong { font-size:11px; font-weight:600; }
+#ai-status { font-size:9px; border-radius:20px; padding:3px 7px; color:#d5bddf; background:#35263e; }
+#ai-status.connected { color:#dcc3e8; background:#3d2e47; }
+.connection-description,.connection-footer p { font-size:10px; line-height:1.6; color:#b69ac6; }
+.ai-connection .field-label { font-size:10px; }
+.ai-connection select { min-width:0; flex:1; border-radius:8px; padding:9px; font-size:10px; }
+.connection-footer { display:flex; align-items:flex-start; gap:8px; justify-content:space-between; }
+.connection-footer p { font-size:9px; margin:9px 0 0; }
+.connection-footer button { margin-top:7px; }
+.connection-warning { background:#382333; color:#efc4dc; padding:8px 10px; margin:10px 0 0; border-radius:7px; font-size:10px; line-height:1.7; }
+.about-note { line-height:1.8; }
+.hover-card,.speech { background:#201927f7; color:#e9d8f1; border-color:#5c426b; }
+.hover-card:after,.speech:after { background:#201927; border-color:#5c426b; }
+.hover-card .todo-text { font-size:12px; color:#eadcf2; }
+.hover-heading,.hover-card .eyebrow { color:#d9b5df; }
+.pet-stage { height:calc(208px * var(--pet-scale,1)); }
+@keyframes cursor-pulse { 0%,100% { opacity:.25; } 50% { opacity:1; } }

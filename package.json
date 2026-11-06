@@ -1,0 +1,24 @@
+{
+  "name": "kuromi-desktop",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A little mischief for your desktop. A local-first Kuromi companion.",
+  "main": "src/main.cjs",
+  "author": "",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test test/*.test.cjs",
+    "test:ui": "node scripts/smoke.cjs",
+    "package": "node scripts/package.cjs"
+  },
+  "devDependencies": {
+    "@electron/packager": "20.3.0",
+    "electron": "45.2.1",
+    "playwright": "1.64.1"
+  },
+  "dependencies": {
+    "three": "0.187.0"
+  }
+}

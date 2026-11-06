@@ -1,0 +1,12 @@
+node_modules/
+release/
+test-results/
+*.log
+.DS_Store
+.cache/
+runtime/
+/kuromi.glb
+/kuromi.zip
+/*.lnk
+.env
+.env.*

@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-eTTkfi6AVBoARNu1E09MLFPmoKFx3iPbw650A50suf8='; style-src 'self'; img-src 'self' data:; worker-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Kuromi's little corner</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="companion.css">
+  <script type="importmap">{"imports":{"three":"../node_modules/three/build/three.module.js"}}</script>
+  <script src="app.js" type="module"></script>
+</head>
+<body>
+  <main id="desktop">
+    <section id="panel" class="panel" data-interactive aria-label="Kuromi's little corner">
+      <header class="panel-header">
+        <span class="brand-mark" aria-hidden="true">♡</span>
+        <div><h1>Kuromi<span class="title-star">♡</span></h1></div>
+        <button id="close-panel" class="icon-button close" aria-label="Close panel" title="Back to your desktop">×</button>
+      </header>
+      <nav class="tabs" aria-label="Kuromi's tools">
+        <button data-tab="chat" class="tab active" aria-pressed="true"><span aria-hidden="true">♡</span><span>Chat</span></button>
+        <button data-tab="tasks" class="tab" aria-pressed="false"><span aria-hidden="true">✓</span><span>To-dos</span><span id="task-count" class="tab-count" hidden>0</span></button>
+        <button data-tab="diary" class="tab" aria-pressed="false"><span aria-hidden="true">▤</span><span>Kuromi Note</span></button>
+        <button data-tab="search" class="tab" aria-pressed="false"><span aria-hidden="true">⌕</span><span>Search</span></button>
+        <button data-tab="settings" class="tab tab-settings" aria-label="Settings" aria-pressed="false" title="Settings"><span aria-hidden="true">⚙</span><span>Settings</span></button>
+      </nav>
+
+      <div class="panel-content">
+        <section data-view="chat" class="view chat-view">
+          <div class="chat-toolbar"><button id="new-chat" class="secondary" type="button" title="Start a fresh conversation; previous messages are archived locally">+ New Chat</button></div>
+          <div id="chat-log" class="chat-log" role="log" aria-label="Conversation with Kuromi">
+            <article id="daily-greeting" class="chat-message assistant greeting"><span class="message-author">KUROMI <span id="greeting-date">· TODAY</span></span><p id="greeting-text">A fresh page, a little mischief. I'm listening. ♡</p><span id="greeting-source" class="message-note"></span></article>
+            <div id="chat-messages" aria-live="polite"></div>
+          </div>
+          <div id="chat-connect-note" class="chat-connect-note"><span>AI isn't connected yet.</span><button id="connect-ai" class="text-button">Connect AI ↗</button></div>
+          <form id="chat-form" class="chat-compose"><textarea id="chat-input" rows="2" maxlength="4000" placeholder="Connect AI in Settings to chat…" aria-label="Message Kuromi" disabled required></textarea><div class="chat-compose-actions"><button id="chat-stop" class="secondary" type="button" hidden>Stop</button><button id="chat-send" class="primary" aria-label="Send message" disabled>Send ↗</button></div></form>
+        </section>
+
+        <section data-view="tasks" class="view" hidden>
+          <div class="section-heading"><h2>To-dos<span>✓</span></h2></div>
+          <form id="todo-form" class="input-row"><input id="todo-input" maxlength="240" placeholder="What's the next little victory?" aria-label="New to-do" autocomplete="off" required><button class="primary square" aria-label="Add to-do">+</button></form>
+          <div class="list-heading"><span id="todo-summary">NOTHING ON OUR LIST… YET</span><button id="show-completed" class="text-button" aria-pressed="false">Show finished</button></div>
+          <div id="todo-list" class="entry-list" aria-live="polite"></div>
+        </section>
+
+        <section data-view="diary" class="view" hidden>
+          <div class="section-heading"><h2>Kuromi Note<span>♡</span></h2><p>A place to leave your thoughts.</p></div>
+          <form id="thought-form"><textarea id="thought-input" maxlength="4000" placeholder="Today, I was thinking…" aria-label="A thought for Kuromi Note" rows="3" required></textarea><div class="diary-controls"><label class="mood-label">Feeling <select id="thought-mood" aria-label="Thought mood"><option value="neutral">just me</option><option value="happy">happy ♡</option><option value="dreamy">dreamy ✦</option><option value="frustrated">grumpy</option><option value="sad">a little blue</option></select></label><button class="primary">Keep this thought <span>↗</span></button></div></form>
+          <div class="list-heading"><span id="diary-summary">YOUR THOUGHTS, SAFELY TUCKED AWAY</span><button id="export-journal" class="text-button">Export notes ↗</button></div>
+          <div id="thought-list" class="entry-list diary-list" aria-live="polite"></div>
+        </section>
+
+        <section data-view="search" class="view" hidden>
+          <div class="section-heading"><h2>Search<span>⌕</span></h2><p>Open Google in your browser.</p></div>
+          <form id="search-form"><label class="field-label" for="search-input">What are we looking for?</label><input id="search-input" maxlength="500" placeholder="Romance novels, world domination…" autocomplete="off" required><button class="primary full">Search Google <span>↗</span></button></form>
+        </section>
+
+        <section data-view="settings" class="view" hidden>
+          <div class="section-heading"><h2>Settings<span>⚙</span></h2></div>
+          <section class="ai-connection" aria-label="AI connection"><div class="connection-heading"><strong>Local conversation</strong><span id="ai-status">Not connected</span></div><p class="connection-description">Kuromi's personality, running on your PC with Ollama.</p><form id="ai-form"><label class="field-label" for="ai-model">Installed model</label><div class="input-row"><select id="ai-model" aria-label="Local Ollama model"><option value="">Looking for local models…</option></select><button id="ai-connect" class="primary">Use model</button></div></form><div class="connection-footer"><p>Chat stays on this PC. No API key or subscription.<br>Chat never reads your notes. Daily nudges use one unfinished to-do.</p><button id="ai-refresh" class="text-button" type="button">Refresh ↻</button></div><p id="ai-warning" class="connection-warning" role="status" hidden></p></section>
+          <div class="settings-list">
+            <label class="setting"><span><strong>Always on top</strong></span><input id="always-on-top" type="checkbox" role="switch"></label>
+            <label class="setting"><span><strong>Wander when idle</strong></span><input id="roaming" type="checkbox" role="switch"></label>
+            <label class="setting"><span><strong>Reduced motion</strong></span><input id="reduced-motion" type="checkbox" role="switch"></label>
+            <label class="setting size-setting"><span><strong>Pet size</strong><small id="size-label">100%</small></span><input id="pet-scale" type="range" min="0.75" max="1.25" step="0.05" value="1" aria-label="Pet size"></label>
+          </div>
+          <div class="window-actions"><button id="hide-pet" class="secondary">Hide to tray</button><button id="quit" class="text-button">Quit Kuromi</button></div>
+          <p class="about-note">Drag to move · Click for tools · Tray icon to return<br><span>3D model: jiayingc · CC BY 4.0<br>Unofficial personal companion · Kuromi © Sanrio</span></p>
+        </section>
+      </div>
+    </section>
+
+    <section id="hover-card" class="hover-card" data-interactive hidden aria-label="Unfinished to-dos"><div class="hover-heading"><span class="eyebrow">OUR LITTLE PLANS</span><span id="hover-count"></span></div><div id="hover-todos"></div><button id="hover-open" class="text-button">Open my list ↗</button></section>
+    <div id="speech" class="speech" data-interactive role="status" hidden></div>
+    <div id="pet-stage" class="pet-stage">
+      <button id="pet-button" class="pet-button" data-interactive aria-label="Kuromi — click for tools, drag to move" aria-expanded="true" title="Click for my corner · drag to move"><canvas id="pet-canvas" width="192" height="208" aria-hidden="true"></canvas></button>
+    </div>
+    <div id="toast" data-interactive role="status" hidden></div>
+  </main>
+</body>
+</html>

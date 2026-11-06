@@ -1,0 +1,9 @@
+**
+!package.json
+!package-lock.json
+!src/
+!src/**
+!assets/
+!assets/**
+!Dockerfile
+!docker-start.sh
