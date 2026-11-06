@@ -15,14 +15,15 @@ npm start
 
 ## Docker desktop preview
 
-Build and run the Linux desktop in your browser from this project folder:
+Run the Linux desktop in your browser with Docker Desktop in Linux container mode:
 
 ```powershell
-docker build -t kuromi:latest .
-docker run --rm --init -p 127.0.0.1:6080:6080 -v kuromi-data:/data kuromi:latest
+docker run --rm --init -p 127.0.0.1:6080:6080 -v kuromi-data:/data devanshadhini/kuromi:latest
 ```
 
-Open [the local desktop](http://localhost:6080/vnc.html?autoconnect=true). The named volume saves your notes and tasks. This build uses a virtual Linux display and runs Electron without Chromium's sandbox. Keep the browser desktop port bound to loopback because the viewer has no password. Local chat requires Ollama reachable on loopback inside the container, so the default container runs with offline tools.
+Open [the local desktop](http://localhost:6080/vnc.html?autoconnect=true). The named volume saves your notes and tasks. This build uses a virtual Linux display and software 3D rendering. It runs Electron without Chromium's sandbox. Keep the browser desktop port bound to loopback because the viewer has no password. Local chat requires Ollama reachable on loopback inside the container, so the default container runs with offline tools.
+
+To build from source, run `docker build -t kuromi:latest .` and substitute `kuromi:latest` in the run command.
 
 ## Local conversation
 
