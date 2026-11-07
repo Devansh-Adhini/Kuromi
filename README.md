@@ -4,7 +4,9 @@ A personal Windows desktop companion using your downloaded Sketchfab Kuromi mode
 
 ## Start
 
-Double-click `Launch Kuromi.lnk` in this project folder, or run `release/Kuromi Desktop-win32-x64/Kuromi Desktop.exe` after building. Keep the executable with the rest of that folder. Kuromi is portable; conversation also needs the local Ollama runtime and model described below.
+Run `release/Kuromi Desktop Setup 1.1.0.exe` to install Kuromi for your Windows account. Then search for **Kuromi Desktop** in Start. In Kuromi's **Settings**, turn on **Launch at Windows login** if you want her on the desktop when you sign in. Uninstall through Windows **Installed apps**. Your notes and chats are stored separately from the program files.
+
+For the portable build, double-click `Launch Kuromi.lnk` in this project folder, or run `release/Kuromi Desktop-win32-x64/Kuromi Desktop.exe` after building. Keep the executable with the rest of that folder.
 
 For development, install Node.js 24 or newer and run:
 
@@ -36,7 +38,7 @@ winget install --id Ollama.Ollama --exact --source winget
 ollama pull llama3.2:3b
 ```
 
-Open Kuromi. She detects installed local models; choose another in Settings if desired. **Refresh** checks the connection again. When no server is running, she can start Ollama from `runtime/ollama/ollama.exe` in this project, or its standard Windows installation location. The project runtime uses `runtime/models` for model data. Keep `runtime` beside the `release` folder when using this portable setup. There is no Windows service or startup registration added by Kuromi.
+Open Kuromi. She detects installed local models; choose another in Settings if desired. **Refresh** checks the connection again. The Windows installer can include the standalone Ollama runtime, which uses your regular per-user Ollama model store. When no server is running, Kuromi starts the bundled or installed runtime without a console window. If you need to download the model on a fresh PC with the bundled runtime, run `& "$env:LOCALAPPDATA\Programs\Kuromi Desktop\resources\ollama\ollama.exe" pull llama3.2:3b` from PowerShell while Kuromi is open. A model download is separate from the installer. The portable project runtime uses `runtime/models` for model data.
 
 The chat connection is fixed to `127.0.0.1:11434`. Cloud model tags are excluded. Kuromi's own server startup disables Ollama cloud use and binds to loopback. Model downloads require an internet connection; conversation runs locally after setup. Your browser still uses Google when you explicitly use Search.
 
@@ -45,7 +47,7 @@ The chat connection is fixed to `127.0.0.1:11434`. Cloud model tags are excluded
 - **Click Kuromi** to open or close her corner. Clicking elsewhere or switching applications collapses the panel. Unsent drafts remain when it closes. The interface uses black, purple, white and pink, without a pet name tag or status footer.
 - **New Chat:** starts a fresh conversation context. The previous conversation is archived in `%APPDATA%/kuromi-desktop/conversations/`; notes and tasks are preserved. The button is disabled while a reply is streaming.
 - **Chat:** conversational, playful Kuromi, with a soft sentimental side. She listens and banters; the prompt asks her to give advice when requested. Enter sends; Shift+Enter adds a line. Replies stream as they arrive; **Stop** cancels a reply and restores your message for editing. Failed or canceled exchanges aren't saved.
-- **Daily motivation:** when unfinished to-dos exist, Kuromi picks one and gives a varied, sassy work nudge. These task-specific lines are assembled locally; task titles never go to the model. Finished or deleted tasks are replaced in the greeting. With an empty list, she gives a model-generated hello, or a labeled offline fallback. Greetings are cached for the local calendar day across restarts. The app must be open or launched that day; it doesn't create an OS reminder or start at login.
+- **Daily motivation:** when unfinished to-dos exist, Kuromi picks one and gives a varied, sassy work nudge with a beckon or smug pose. These task-specific lines are assembled locally; task titles never go to the model. Finished or deleted tasks are replaced in the greeting. With an empty list, she gives a model-generated hello, or a labeled offline fallback. Greetings are cached for the local calendar day across restarts. The app must be running that day; the Windows login toggle can launch her automatically.
 - **To-dos:** add a task, then hover over her to see unfinished plans above her. Click a checkbox to finish one. Use “Show finished” to reopen tasks.
 - **Kuromi Note:** write a thought, choose your mood, and keep it in a dated log. Export your notes as text or JSON. Deleting a diary entry requires a second click on “Delete?”.
 - **Search:** enter a query to open Google in your default browser. Only the search query is sent; to-dos and diary entries stay local.
@@ -53,7 +55,7 @@ The chat connection is fixed to `127.0.0.1:11434`. Cloud model tags are excluded
 - **Settings:** always on top, optional idle wandering, reduced motion, and pet size. Hide her to the system tray; click her tray icon to bring her back. Quit from Settings or the tray menu.
 - **Automatic reactions:** her gestures respond to conversation, tasks, diary moods, cursor direction, dragging, and idle time. The menu contains Chat, To-dos, Kuromi Note, Search, and Settings, without a duplicate home page or animation buttons.
 
-Animation uses the supplied GLB and 25 behavior modes, including listening, talking, reading her notebook, head tilts, stretching, ear twitches, giggling, pouting, and looking around. The static download has no skeleton or animation clips, so the app adds a nine-bone rig to its original meshes. Head, ears, arms and legs move through joints; attachment areas blend into the body. The model is uniformly normalized once for display, with fixed bone lengths and no pose-dependent body scaling or replacement anatomy. Head turns follow the cursor continuously within natural yaw and pitch limits. Turning and bending can change the visible silhouette while her underlying proportions stay consistent.
+Animation uses the supplied GLB and 33 behavior modes, including listening, talking, reading her notebook, head tilts, stretching, ear twitches, giggling, pouting, and looking around. Eight additional gestures bring nods, head shakes, a smug pose, beckoning, tiptoeing, a curtsy, yawning and victory fist pumps. Greetings, chat replies, task completions, note moods and idle moments choose fitting reactions with variation. The static download has no skeleton or animation clips, so the app adds a nine-bone rig to its original meshes. Head, ears, arms and legs move through joints; attachment areas blend into the body. The model is uniformly normalized once for display, with fixed bone lengths and no pose-dependent body scaling or replacement anatomy. Head turns follow the cursor continuously within natural yaw and pitch limits. Turning and bending can change the visible silhouette while her underlying proportions stay consistent.
 
 The handmade character has been replaced with **Kuromi by [jiayingc](https://sketchfab.com/jiayingc)** from [Sketchfab](https://sketchfab.com/3d-models/kuromi-a9a4883cbc2a40e89722001aa6288ba8), licensed in its embedded metadata under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The original geometry is retained; the app adds a skeleton, movement controls and an optional notebook prop. A runtime palette makes the source's grey hood, ears, collar and tail black, with a pink skull and accents. White body parts and eyes keep their source colors. See [model attribution](assets/ATTRIBUTION.md). `assets/kuromi.glb` is a byte-identical copy of the download, and the original GLB and OBJ ZIP remain untouched in the project root.
 
@@ -69,7 +71,7 @@ The model's character prompt draws on Kuromi's mischievous pride, My Melody riva
 
 Tasks, thoughts, settings, and window position are stored in `%APPDATA%/kuromi-desktop/journal.json`. Conversation history (up to 40 messages), model selection, and recent daily greetings are stored separately in `companion.json`. Both files are local plaintext. The model receives a bounded recent chat context, with no automatic access to diary entries, tasks, files, or your browser. Saves use temporary files and atomic rename; unreadable files are preserved as `.corrupt-*` for recovery.
 
-There is no analytics, remote web content, account, or automatic startup in Kuromi. Her original ChatGPT pet artwork is preserved locally for reference, the app icon and the compatibility fallback; the ChatGPT pet isn't modified.
+Windows startup is opt-in through Settings. There is no analytics, remote web content or account in Kuromi. Her original ChatGPT pet artwork is preserved locally for reference, the app icon and the compatibility fallback; the ChatGPT pet isn't modified.
 
 ## Check and build
 
@@ -78,6 +80,7 @@ npm test
 npm run test:ui
 node scripts/ui-features.cjs
 npm run package
+npm run package:installer
 ```
 
 The unit suite checks storage, damaged-file recovery, streaming/cancellation, local model validation, daily greeting caching, unchanged 3D anatomy across every action, continuous head angles and animation state transitions. The real Electron UI suite uses an isolated profile and simulated Ollama transport. It checks all tools, streaming chat, cancellation, privacy boundaries, restart persistence, native window controls, real 3D rendering and clipping across all gestures; it reports observed refresh timing. Browser opening and export dialogs are intercepted. Screenshots go in `test-results/`. The simulated transport does not establish that a particular model is installed or working; actual local inference must also be checked during setup.

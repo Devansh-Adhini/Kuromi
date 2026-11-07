@@ -27,8 +27,9 @@ export function evaluateRigPose(name, elapsed, { time = elapsed, lookX = 0, look
   }
   switch (name) {
     case 'wave':
-      pose.rightArmZ = 2.05 + s(t * 9) * 0.18;
-      pose.rightArmX = 1;
+      // Sweep outside the wide ruff so the source model's small hand stays visible.
+      pose.rightArmZ = 1.25 + s(t * 7) * 0.25;
+      pose.rightArmX = 0.08 + s(t * 7 - 0.6) * 0.1;
       pose.headRoll = 0.06;
       break;
     case 'dance':
@@ -107,6 +108,97 @@ export function evaluateRigPose(name, elapsed, { time = elapsed, lookX = 0, look
       const envelope = Math.sin(Math.min(1, t / 2.2) * Math.PI);
       pose.leftEar = s(t * 15) * envelope * 0.15;
       pose.rightEar = s(t * 15 + 0.8) * envelope * 0.09;
+      break;
+    }
+    case 'nod': {
+      const envelope = s(Math.min(1, t / 2.4) * Math.PI) ** 2;
+      pose.headPitch = (0.04 + (1 - Math.cos(t * 6)) * 0.11) * envelope;
+      pose.headRoll = -0.035 * envelope;
+      pose.rightEar += s(t * 6 - 0.4) * envelope * 0.04;
+      break;
+    }
+    case 'head-shake': {
+      const envelope = s(Math.min(1, t / 2.6) * Math.PI) ** 2;
+      pose.headYaw = s(t * 7) * envelope * 0.38;
+      pose.headPitch = -0.05 * envelope;
+      pose.bodyYaw = -pose.headYaw * 0.12;
+      pose.leftEar += s(t * 7 - 0.5) * envelope * 0.055;
+      pose.rightEar += s(t * 7 - 0.8) * envelope * 0.055;
+      break;
+    }
+    case 'smug': {
+      const envelope = s(Math.min(1, t / 3.6) * Math.PI) ** 2;
+      pose.headYaw = -0.2 * envelope;
+      pose.headPitch = -0.1 * envelope;
+      pose.headRoll = -0.1 * envelope;
+      pose.bodyYaw = 0.14 * envelope;
+      pose.rightArmX = -0.55 * envelope;
+      pose.rightArmZ = 0.12 - 0.42 * envelope;
+      pose.leftArmZ = -0.12 - 0.35 * envelope;
+      pose.leftEar += 0.075 * envelope;
+      pose.rightEar -= 0.035 * envelope;
+      break;
+    }
+    case 'beckon': {
+      const envelope = s(Math.min(1, t / 3.2) * Math.PI) ** 2;
+      pose.rightArmX = (-0.35 + s(t * 7) * 0.25) * envelope;
+      pose.rightArmZ = 0.12 + (0.95 + s(t * 7 - 0.5) * 0.28) * envelope;
+      pose.headYaw = 0.08 * envelope;
+      pose.headRoll = -0.06 * envelope;
+      pose.bodyYaw = -0.1 * envelope;
+      break;
+    }
+    case 'tiptoe': {
+      const envelope = s(Math.min(1, t / 4.2) * Math.PI) ** 2;
+      const step = s(t * 6);
+      pose.rootY += (0.025 + step * step * 0.035) * envelope;
+      pose.rootX = s(t * 3) * envelope * 0.045;
+      pose.bodyYaw = -0.24 * envelope;
+      pose.headYaw = (0.2 + s(t * 1.5) * 0.13) * envelope;
+      pose.headPitch = 0.04 * envelope;
+      pose.leftLegX = step * envelope * 0.24;
+      pose.rightLegX = -pose.leftLegX;
+      pose.leftArmX = (-0.4 - step * 0.08) * envelope;
+      pose.rightArmX = (-0.4 + step * 0.08) * envelope;
+      pose.leftArmZ = -0.12 - 0.25 * envelope;
+      pose.rightArmZ = 0.12 + 0.25 * envelope;
+      break;
+    }
+    case 'curtsy': {
+      const envelope = s(Math.min(1, t / 3.2) * Math.PI) ** 2;
+      pose.rootY -= 0.025 * envelope;
+      pose.headPitch = 0.22 * envelope;
+      pose.headRoll = 0.04 * envelope;
+      pose.bodyYaw = 0.12 * envelope;
+      pose.leftArmZ = -0.12 - 0.48 * envelope;
+      pose.rightArmZ = 0.12 + 0.48 * envelope;
+      pose.leftArmX = pose.rightArmX = -0.12 * envelope;
+      pose.leftLegX = -0.12 * envelope;
+      pose.rightLegX = 0.12 * envelope;
+      break;
+    }
+    case 'yawn': {
+      const envelope = s(Math.min(1, t / 4.8) * Math.PI) ** 2;
+      pose.headPitch = -0.12 * envelope;
+      pose.headRoll = 0.065 * envelope;
+      pose.rightArmX = -1.05 * envelope;
+      pose.rightArmZ = 0.12 + 0.22 * envelope;
+      pose.leftArmZ = -0.12 - 0.22 * envelope;
+      pose.leftEar -= 0.06 * envelope;
+      pose.rightEar += 0.06 * envelope;
+      pose.blink = Math.max(pose.blink, envelope);
+      pose.mouth = envelope * 0.8;
+      break;
+    }
+    case 'fist-pump': {
+      const envelope = s(Math.min(1, t / 2.8) * Math.PI) ** 2;
+      const pump = (1 - Math.cos(t * 8)) / 2;
+      pose.rightArmZ = 0.12 + (0.75 + pump * 0.48) * envelope;
+      pose.rightArmX = (-0.1 + pump * 0.15) * envelope;
+      pose.leftArmZ = -0.12 - 0.28 * envelope;
+      pose.rootY += pump * envelope * 0.065;
+      pose.headRoll = -0.055 * envelope;
+      pose.leftEar += pump * envelope * 0.04;
       break;
     }
   }

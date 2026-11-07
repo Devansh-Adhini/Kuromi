@@ -18,7 +18,7 @@ async function main() {
   }
   const outputs = await packager({
     dir: path.resolve(__dirname, '..'),
-    out: path.resolve(__dirname, '..', 'release'),
+    out: process.env.KUROMI_PACKAGE_DIR || path.resolve(__dirname, '..', 'release'),
     name: 'Kuromi Desktop',
     executableName: 'Kuromi Desktop',
     icon: path.resolve(__dirname, '..', 'assets', 'icon.ico'),
@@ -28,7 +28,7 @@ async function main() {
     asar: true,
     overwrite: true,
     prune: true,
-    ignore: [/^\/release(?:\/|$)/, /^\/runtime(?:\/|$)/, /^\/test(?:\/|$)/, /^\/test-results(?:\/|$)/, /^\/scripts(?:\/|$)/, /^\/kuromi\.(?:glb|zip)$/i, /^\/Launch Kuromi\.lnk$/i, /^\/\.git(?:\/|$)/, /^\/\.cache(?:\/|$)/, /^\/\.test-artifacts(?:\/|$)/],
+    ignore: [/^\/release(?:\/|$)/, /^\/runtime(?:\/|$)/, /^\/test(?:\/|$)/, /^\/test-results(?:\/|$)/, /^\/scripts(?:\/|$)/, /^\/installer(?:\/|$)/, /^\/kuromi\.(?:glb|zip)$/i, /^\/Launch Kuromi\.lnk$/i, /^\/\.git(?:\/|$)/, /^\/\.cache(?:\/|$)/, /^\/\.test-artifacts(?:\/|$)/],
     win32metadata: { CompanyName: 'Personal desktop companion', FileDescription: 'Kuromi Desktop', ProductName: 'Kuromi Desktop' },
   });
   for (const output of outputs) {

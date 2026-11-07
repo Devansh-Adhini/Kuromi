@@ -16,6 +16,7 @@ const thought = 'A small thought — saved privately, even after restarting. <sc
 const model = 'llama3.2:3b';
 const chatText = 'I had a long day today.';
 const chatReply = 'You made it through today. Come sit with me for a minute. We can take the next little thing slowly. ♡';
+const newGestures = ['nod', 'head-shake', 'smug', 'beckon', 'tiptoe', 'curtsy', 'yawn', 'fist-pump'];
 let application;
 let page;
 const errors = [];
@@ -126,11 +127,12 @@ async function motionChecks() {
     const pet = globalThis.__testPet = new PetAnimator(canvas);
     await pet.ready;
     cancelAnimationFrame(pet.frameRequest);
-    const sheet = document.createElement('canvas'); sheet.width = 960; sheet.height = 1230;
+    const sheet = document.createElement('canvas');
+    sheet.width = 960; sheet.height = 60 + Math.ceil(Object.keys(ANIMATIONS).length / 5) * 234;
     const ctx = sheet.getContext('2d');
     ctx.fillStyle = '#f2eaf7'; ctx.fillRect(0, 0, sheet.width, sheet.height);
     ctx.fillStyle = '#4b3559'; ctx.font = '600 18px Segoe UI';
-    ctx.fillText('Kuromi · one 3D body across all 25 gestures', 12, 28);
+    ctx.fillText(`Kuromi · one 3D body across all ${Object.keys(ANIMATIONS).length} gestures`, 12, 28);
     ctx.font = '12px Segoe UI'; ctx.fillText('Fixed anatomy · continuous joint angles · actual desktop renderer', 12, 47);
     function inspect() {
       const data = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
@@ -172,7 +174,17 @@ async function motionChecks() {
     assert.equal(result.stats.renderer, 'rigged 3D WebGL', 'This GPU must render the volumetric model, not a fallback');
     assert.equal(result.stats.model?.author, 'jiayingc', 'The renderer uses the supplied Sketchfab model');
     assert.ok(result.stats.triangles>=170172, 'The renderer retains the original model geometry');
-    assert.equal(result.states.length,25);
+    assert.equal(result.states.length, result.stats.animations);
+    const idleFrames = result.states.find(state => state.name === 'idle').frames;
+    const trajectories = new Set();
+    for (const name of newGestures) {
+      const state = result.states.find(state => state.name === name);
+      assert.ok(state, `${name} is registered and rendered`);
+      assert.ok(state.frames.some((frame, index) => frame.hash !== idleFrames[index].hash), `${name} changes the rendered model`);
+      const trajectory = state.frames.map(frame => frame.hash).join(',');
+      assert.ok(!trajectories.has(trajectory), `${name} has a distinct rendered gesture`);
+      trajectories.add(trajectory);
+    }
     for(const {name,frames} of result.states) for(const frame of frames) {
       assert.ok(frame.area>2000, `${name} at ${frame.elapsed}s remains visible`);
       assert.ok(frame.left>1 && frame.top>1 && frame.right<frame.width-2 && frame.bottom<frame.height-2,
@@ -181,7 +193,7 @@ async function motionChecks() {
     }
     assert.equal(new Set(result.directions.map(item=>item.yaw)).size,61,'The rendered rig has 61 distinct head directions');
     assert.ok(new Set(result.directions.map(item=>item.hash)).size>40,'Continuous turns change real rendered pixels');
-    for (const name of ['wave', 'head-tilt', 'talk', 'review']) {
+    for (const name of ['wave', 'head-tilt', 'talk', 'review', ...newGestures]) {
       await page.evaluate((animation) => {
         const pet = globalThis.__testPet;
         pet.play(animation, { loop: true });
@@ -382,8 +394,18 @@ async function main() {
     assert.ok(timing.frames > 10, 'Animation frames continue to be scheduled');
     console.log(`Observed display cadence: ${(1000 / timing.medianMs).toFixed(1)} fps median; p95 frame interval ${timing.p95Ms.toFixed(2)} ms. This measures this display, not a guaranteed120 fps.`);
     await motionChecks();
+    await page.evaluate(async () => {
+      const { PetAnimator } = await import('./pet.js');
+      const play = PetAnimator.prototype.play;
+      globalThis.__observedAnimations = [];
+      PetAnimator.prototype.play = function (name, options) {
+        if (this.canvas.id === 'pet-canvas') globalThis.__observedAnimations.push(name);
+        return play.call(this, name, options);
+      };
+    });
     await chatChecks();
     await tab('tasks');
+    await page.evaluate(() => { globalThis.__observedAnimations.length = 0; });
     await page.locator('#todo-input').fill(task);
     await page.locator('#todo-form').evaluate((form) => form.requestSubmit());
     await page.getByText(task, { exact: true }).first().waitFor();
@@ -393,6 +415,7 @@ async function main() {
     assert.equal(saved.todos.length, 1);
     assert.equal(saved.todos[0].text, task);
     assert.equal(saved.todos[0].done, false);
+    await page.waitForFunction(() => globalThis.__observedAnimations.some(name => ['beckon', 'smug'].includes(name)));
 
     await page.locator('#close-panel').click();
     await page.locator('#pet-button').hover();
@@ -404,8 +427,10 @@ async function main() {
     await page.screenshot({ path: path.join(output, 'hover.png') });
 
     await tab('tasks');
+    await page.evaluate(() => { globalThis.__observedAnimations.length = 0; });
     await page.getByRole('button', { name: `Complete ${task}`, exact: true }).or(page.getByRole('checkbox', { name: `Complete ${task}`, exact: true })).click();
     await page.waitForFunction(async () => (await window.kuromi.load()).todos[0]?.done === true);
+    await page.waitForFunction(() => globalThis.__observedAnimations.some(name => ['dance', 'fist-pump'].includes(name)));
     await page.locator('#close-panel').click();
     await page.locator('#pet-button').hover();
     await page.waitForTimeout(250);
@@ -589,7 +614,7 @@ async function main() {
     await tab('diary');
     await page.getByText(thought, { exact: true }).waitFor();
     assert.deepEqual(errors, [], 'Renderer has no uncaught exceptions');
-    console.log('PASS: real Electron UI; Ollama NDJSON streaming and cancellation using a local fake transport; fixed loopback/model discovery; private-note exclusion; cached daily greeting; all 25 rigged 3D gestures and continuous head tracking; context loss/recovery; reduced motion; safe task/thought text; hover completion; export; encoded Google search; native window settings; restart persistence.');
+    console.log('PASS: real Electron UI; Ollama NDJSON streaming and cancellation using a local fake transport; fixed loopback/model discovery; private-note exclusion; cached daily greeting; all registered rigged 3D gestures and continuous head tracking; task celebration; context loss/recovery; reduced motion; safe task/thought text; hover completion; export; encoded Google search; native window settings; restart persistence.');
     console.log(`Screenshots: ${path.join(output, 'desktop.png')} and ${path.join(output, 'hover.png')}`);
   } catch (error) {
     if (page && !page.isClosed()) await page.screenshot({ path: path.join(output, 'failure.png') }).catch(() => {});

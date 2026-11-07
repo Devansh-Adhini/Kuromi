@@ -9,6 +9,9 @@ const { Store, validatePosition } = require('./store.cjs');
 const { Companion } = require('./companion.cjs');
 
 const RENDERER_URL = pathToFileURL(path.join(__dirname, 'index.html')).href;
+const STARTUP_NAME = 'KuromiDesktop';
+const canStartAtLogin = process.platform === 'win32' && app.isPackaged;
+let ownedOllama;
 let petWindow;
 let tray;
 let store;
@@ -26,6 +29,7 @@ function startInstalledOllama() {
       ? path.resolve(path.dirname(app.getPath('exe')), '..', '..')
       : path.resolve(__dirname, '..');
     const locations = [
+      app.isPackaged && { executable: path.join(process.resourcesPath, 'ollama', 'ollama.exe') },
       {
         executable: path.join(projectDirectory, 'runtime', 'ollama', 'ollama.exe'),
         modelsDirectory: path.join(projectDirectory, 'runtime', 'models'),
@@ -36,20 +40,35 @@ function startInstalledOllama() {
     for (const { executable, modelsDirectory } of locations) {
       try { await fs.access(executable); } catch { continue; }
       return new Promise((resolve) => {
+        if (quitting) { resolve(false); return; }
+        // On Windows a detached process bypasses libuv's CREATE_NO_WINDOW path.
         const child = spawn(executable, ['serve'], {
-          detached: true, windowsHide: true, stdio: 'ignore',
+          windowsHide: true, stdio: 'ignore',
           env: {
             ...process.env, OLLAMA_HOST: '127.0.0.1:11434', OLLAMA_NO_CLOUD: '1',
             ...(modelsDirectory ? { OLLAMA_MODELS: modelsDirectory } : {}),
           },
         });
         child.once('error', () => resolve(false));
-        child.once('spawn', () => { child.unref(); resolve(true); });
+        child.once('spawn', () => {
+          ownedOllama = child;
+          if (quitting) child.kill();
+          child.unref();
+          resolve(!quitting);
+        });
+        child.once('exit', () => { if (ownedOllama === child) ownedOllama = null; });
       });
     }
     return false;
   })().finally(() => { startingOllama = null; });
   return startingOllama;
+}
+
+function startupSettings() {
+  if (!canStartAtLogin) return { supported: false, enabled: false };
+  const options = { path: app.getPath('exe') };
+  const { launchItems } = app.getLoginItemSettings(options);
+  return { supported: true, enabled: launchItems.some((item) => item.name === STARTUP_NAME && item.scope === 'user' && item.enabled) };
 }
 
 function isTrusted(event) {
@@ -125,6 +144,14 @@ function trayImage() {
 
 function registerIPC() {
   handle('kuromi:load', () => store.load());
+  handle('kuromi:get-startup', startupSettings);
+  handle('kuromi:set-startup', (enabled) => {
+    if (!canStartAtLogin || typeof enabled !== 'boolean') throw new Error('Launch at login is available in the Windows build.');
+    app.setLoginItemSettings({ name: STARTUP_NAME, path: app.getPath('exe'), openAtLogin: enabled });
+    const actual = startupSettings();
+    if (actual.enabled !== enabled) throw new Error('Windows did not apply the startup setting.');
+    return actual;
+  });
   // Fixed bundled asset only. The renderer cannot supply a filesystem path.
   handle('kuromi:load-model', () => fs.readFile(path.join(__dirname, '..', 'assets', 'kuromi.glb')));
   handle('kuromi:add-todo', (text) => store.addTodo(text));
@@ -273,11 +300,17 @@ async function start() {
 app.setPath('userData', !app.isPackaged && process.env.KUROMI_USER_DATA
   ? path.resolve(process.env.KUROMI_USER_DATA)
   : path.join(app.getPath('appData'), 'kuromi-desktop'));
+if (process.platform === 'win32') app.setAppUserModelId('com.kuromi.desktop');
 
 if (!app.requestSingleInstanceLock()) {
   app.quit();
+} else if (process.argv.includes('--quit-for-update')) {
+  app.quit();
 } else {
-  app.on('second-instance', showPet);
+  app.on('second-instance', (_event, args) => {
+    if (args.includes('--quit-for-update')) app.quit();
+    else showPet();
+  });
   app.on('activate', showPet);
   app.on('window-all-closed', () => { if (quitting) app.quit(); });
   app.on('before-quit', (event) => {
@@ -292,7 +325,7 @@ if (!app.requestSingleInstanceLock()) {
       : Promise.resolve();
     pendingPosition.catch((error) => console.error('Could not save pet position:', error.message))
       .then(() => Promise.allSettled([store.flush(), companionShutdown]))
-      .finally(() => { quitComplete = true; app.quit(); });
+      .finally(() => { ownedOllama?.kill(); quitComplete = true; app.quit(); });
   });
   app.whenReady().then(start).catch((error) => {
     dialog.showErrorBox('Kuromi could not start', error.message);

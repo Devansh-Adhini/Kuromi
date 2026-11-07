@@ -40,6 +40,13 @@ const lines = {
   dreamy: ['A little daydream? Your secret is safe with me.', "This sounds like the start of a romance novel. I'm listening.", "Hearts in the margins? Don't look at me like that!"],
 };
 const previousLines = new Map();
+let previousAnimation;
+function chooseAnimation(names) {
+  const options = names.filter((name) => name !== previousAnimation);
+  previousAnimation = options[Math.floor(Math.random() * options.length)];
+  return previousAnimation;
+}
+
 function line(kind) {
   const options = lines[kind].filter((value) => value !== previousLines.get(kind));
   const selected = options[Math.floor(Math.random() * options.length)];
@@ -170,7 +177,9 @@ function todoRow(todo, compact = false) {
     check.disabled = true;
     try {
       const lastPlan = !todo.done && state.todos.filter((entry) => !entry.done).length === 1;
-      await mutate(() => api.toggleTodo(todo.id), line(todo.done ? 'reopen' : 'done'), todo.done ? 'waiting' : lastPlan ? 'dance' : 'excited');
+      const reaction = todo.done ? chooseAnimation(['waiting', 'head-shake'])
+        : lastPlan ? chooseAnimation(['dance', 'fist-pump']) : chooseAnimation(['nod', 'fist-pump', 'excited']);
+      await mutate(() => api.toggleTodo(todo.id), line(todo.done ? 'reopen' : 'done'), reaction);
     } catch (error) { check.disabled = false; report(error); }
   });
   row.append(check, element('span', 'todo-text', todo.text));
@@ -277,7 +286,8 @@ $('#thought-form').addEventListener('submit', async (event) => {
   button.disabled = true;
   try {
     const reply = line(mood);
-    const reaction = { neutral: 'thinking', happy: 'giggle', dreamy: 'shy', frustrated: 'pout', sad: 'head-tilt' }[mood];
+    const reaction = chooseAnimation({ neutral: ['thinking', 'nod'], happy: ['giggle', 'smug'],
+      dreamy: ['shy', 'curtsy'], frustrated: ['pout', 'head-shake'], sad: ['head-tilt', 'listen'] }[mood]);
     await mutate(() => api.addThought({ text, mood }), reply, reaction);
     $('#thought-input').value = '';
   } catch (error) { report(error); }
@@ -313,6 +323,21 @@ for (const [selector, setting] of [['#always-on-top', 'alwaysOnTop'], ['#roaming
 $('#pet-scale').addEventListener('input', (event) => { $('#size-label').textContent = `${Math.round(Number(event.target.value) * 100)}%`; });
 $('#hide-pet').addEventListener('click', () => api.hide().catch(report));
 $('#quit').addEventListener('click', () => api.quit().catch(report));
+
+async function refreshStartup() {
+  const { supported, enabled } = await api.getStartup();
+  $('#launch-at-login-setting').hidden = !supported;
+  $('#launch-at-login').checked = enabled;
+}
+
+$('#launch-at-login').addEventListener('change', async (event) => {
+  const input = event.target;
+  const requested = input.checked;
+  input.disabled = true;
+  try { input.checked = (await api.setStartup(requested)).enabled; }
+  catch (error) { input.checked = !requested; report(error); }
+  finally { input.disabled = false; }
+});
 
 function messageBubble(message) {
   const bubble = element('article', `chat-message ${message.role}`);
@@ -392,8 +417,9 @@ async function checkDailyGreeting() {
     companion.greeting = greeting;
     showGreeting(greeting);
     if (greeting.isNew) {
-      animator.play('wave');
-      if (!panelOpen) speak(greeting.text, 'wave', 9000);
+      const reaction = greeting.kind === 'task' ? chooseAnimation(['beckon', 'smug']) : chooseAnimation(['wave', 'curtsy']);
+      animator.play(reaction);
+      if (!panelOpen) speak(greeting.text, reaction, 9000);
       else if (tab === 'chat' && !pendingChat) scrollChat();
     }
     if (greeting.warning) {
@@ -484,10 +510,12 @@ $('#chat-form').addEventListener('submit', async (event) => {
   try {
     const response = await api.chat({ text: userText, requestId: request.id });
     companion.history = response.history;
-    let reaction = 'happy';
-    if (/\b(tired|sad|lonely|rough|exhausted|long day|upset|overwhelmed)\b/i.test(userText)) reaction = 'head-tilt';
-    else if (/\b(blush|romance|daydream)\b/i.test(response.message.text)) reaction = 'shy';
-    else if (/\b(hehe|haha|giggle)\b/i.test(response.message.text)) reaction = 'giggle';
+    let reactions = ['happy', 'nod', 'smug'];
+    if (/\b(tired|sad|lonely|rough|exhausted|long day|upset|overwhelmed)\b/i.test(userText)) reactions = ['head-tilt', 'listen'];
+    else if (/\b(blush|romance|daydream)\b/i.test(response.message.text)) reactions = ['shy', 'curtsy'];
+    else if (/\b(hehe|haha|giggle)\b/i.test(response.message.text)) reactions = ['giggle', 'smug'];
+    else if (/\b(finished|completed|did it|proud)\b/i.test(userText)) reactions = ['fist-pump', 'excited'];
+    const reaction = chooseAnimation(reactions);
     if (!panelOpen && !request.stopped) speak(response.message.text, reaction, 9000);
     else if (!request.stopped) animator.play(reaction, { duration: 2200 });
   } catch (error) {
@@ -606,8 +634,8 @@ $('#pet-button').addEventListener('click', (event) => {
 setInterval(async () => {
   if (!state || document.hidden || pendingChat || roaming || drag || panelOpen || petHovered || state.settings.reducedMotion || Date.now() - lastInteraction < 25000) return;
   if (!state.settings.roaming) {
-    const idleReactions = ['look-around', 'look-around', 'head-tilt', 'stretch', 'ear-twitch', 'ear-twitch', 'doze', 'thinking'];
-    if (animator.currentState === 'idle') animator.play(idleReactions[Math.floor(Math.random() * idleReactions.length)]);
+    const idleReactions = ['look-around', 'head-tilt', 'stretch', 'ear-twitch', 'doze', 'thinking', 'smug', 'tiptoe', 'yawn'];
+    if (animator.currentState === 'idle') animator.play(chooseAnimation(idleReactions));
     return;
   }
   roaming = true;
@@ -638,6 +666,7 @@ async function initialize() {
     render();
     renderCompanion();
     selectTab('chat');
+    refreshStartup().catch(report);
     unsubscribeChat = api.onChatDelta(receiveChatDelta);
     animator.play('wave');
     document.body.dataset.ready = 'true';

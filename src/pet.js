@@ -19,6 +19,10 @@ export const ANIMATIONS = Object.freeze({
   listen: behavior(6500, 'Tell me everything'), startled: behavior(2200, 'You surprised me'),
   excited: behavior(4200, 'I cannot hide it'), doze: behavior(18000, 'Dreaming up a little mischief'),
   'ear-twitch': behavior(2400, 'Did I hear something?'),
+  nod: behavior(2400, 'Fine. You have a point'), 'head-shake': behavior(2600, 'Oh, absolutely not'),
+  smug: behavior(3600, 'Naturally, I knew that'), beckon: behavior(3200, 'Come on. Chop chop'),
+  tiptoe: behavior(4200, 'Plotting a tiny escape'), curtsy: behavior(3200, 'You may applaud now'),
+  yawn: behavior(4800, 'Mischief is exhausting'), 'fist-pump': behavior(2800, 'I knew you could do it'),
 });
 
 export function applyRigPose(rig, pose) {
