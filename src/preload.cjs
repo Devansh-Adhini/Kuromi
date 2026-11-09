@@ -18,6 +18,7 @@ contextBridge.exposeInMainWorld('kuromi', Object.freeze({
   getWindowPosition: () => ipcRenderer.invoke('kuromi:get-position'),
   moveWindow: (position) => ipcRenderer.invoke('kuromi:move', position),
   setVisibleArea: (rectangle) => ipcRenderer.invoke('kuromi:set-visible-area', rectangle),
+  getSavedCompanion: () => ipcRenderer.invoke('kuromi:get-saved-companion'),
   getCompanion: () => ipcRenderer.invoke('kuromi:get-companion'),
   newChat: () => ipcRenderer.invoke('kuromi:new-chat'),
   onWindowBlur: (callback) => {

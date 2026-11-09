@@ -21,13 +21,13 @@ let application;
 let page;
 const errors = [];
 
-async function createProfile(prefix) {
+async function createProfile(prefix, history = []) {
   const userData = await fs.mkdtemp(path.join(os.tmpdir(), prefix));
   const today = new Date();
   const localDay = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
   // Avoid an incidental real inference during renderer startup, even if Ollama
   // happens to be running on the developer's machine.
-  await fs.writeFile(path.join(userData, 'companion.json'), JSON.stringify({ version: 1, model, history: [],
+  await fs.writeFile(path.join(userData, 'companion.json'), JSON.stringify({ version: 1, model, history,
     greetings: [{ text: 'Hey, you. A fresh page for us today. What is on your mind?', date: localDay, source: 'local' }] }));
   return userData;
 }
@@ -72,13 +72,25 @@ async function canvasHash() {
 }
 
 async function startupChecks() {
-  await launch(await createProfile('kuromi-startup-'));
+  const savedChat = 'A conversation from the previous session.';
+  await launch(await createProfile('kuromi-startup-', [
+    { id: 'previous-user', role: 'user', text: savedChat, createdAt: new Date().toISOString() },
+  ]));
   try {
-    // Hold only the AI initialization response in this disposable app instance.
-    // Reloading then exercises the normal document startup with a slow AI service.
+    const savedNote = 'A note from the previous session.';
+    const savedTask = 'A task from the previous session.';
+    await page.evaluate(async ({ note, task }) => {
+      await window.kuromi.addTodo(task);
+      await window.kuromi.addThought({ text: note });
+      await window.kuromi.updateSettings({ scale: 0.9 });
+    }, { note: savedNote, task: savedTask });
+    // Hold graphics and AI initialization while the renderer reloads saved data.
     await application.evaluate(({ ipcMain }) => {
+      globalThis.__slowModel = new Promise((resolve) => { globalThis.__releaseSlowModel = resolve; });
       globalThis.__slowCompanion = new Promise((resolve) => { globalThis.__releaseSlowCompanion = resolve; });
       globalThis.__slowGreeting = new Promise((resolve) => { globalThis.__releaseSlowGreeting = resolve; });
+      ipcMain.removeHandler('kuromi:load-model');
+      ipcMain.handle('kuromi:load-model', () => globalThis.__slowModel);
       ipcMain.removeHandler('kuromi:get-companion');
       ipcMain.handle('kuromi:get-companion', () => globalThis.__slowCompanion);
       ipcMain.removeHandler('kuromi:daily-greeting');
@@ -86,13 +98,18 @@ async function startupChecks() {
     });
     await page.reload();
     await page.waitForFunction(() => document.body.dataset.ready === 'true');
+    await page.getByText(savedChat, { exact: true }).waitFor({ state: 'attached' });
+    await tab('diary');
+    await page.getByText(savedNote, { exact: true }).waitFor();
+    assert.equal(await page.locator('#pet-scale').inputValue(), '0.9');
     assert.equal(await page.evaluate(() => document.body.dataset.companionReady === 'true'), false);
     await tab('tasks');
+    await page.getByText(savedTask, { exact: true }).first().waitFor();
     await page.locator('#todo-input').fill('Offline tools remain available while AI starts');
     await page.locator('#todo-form').evaluate((form) => form.requestSubmit());
     await page.getByText('Offline tools remain available while AI starts', { exact: true }).first().waitFor();
     const saved = await page.evaluate(() => window.kuromi.load());
-    assert.equal(saved.todos.length, 1, 'To-dos save while AI startup is still pending');
+    assert.equal(saved.todos.length, 2, 'The previous task remains and the new task saves during startup');
     assert.equal(await page.evaluate(() => document.body.dataset.companionReady === 'true'), false);
     await application.evaluate((_electron, name) => {
       const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
@@ -109,8 +126,9 @@ async function startupChecks() {
     });
     await page.getByText('A fresh greeting for today.', { exact: true }).waitFor({ state: 'attached' });
     assert.equal((await page.locator('#greeting-date').innerText()).trim(), '· TODAY');
-    console.log('PASS: offline tools initialize and persist a task before slow AI initialization completes.');
+    console.log('PASS: saved notes, settings and chat appear and offline tools work while graphics and AI initialize.');
   } finally {
+    await application.evaluate(() => globalThis.__releaseSlowModel?.()).catch(() => {});
     await application.close();
     application = null;
   }

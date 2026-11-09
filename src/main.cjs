@@ -197,6 +197,7 @@ function registerIPC() {
     return position;
   });
   handle('kuromi:set-visible-area', setVisibleArea);
+  handle('kuromi:get-saved-companion', () => companion.loadSaved());
   handle('kuromi:get-companion', () => companion.load());
   handle('kuromi:new-chat', () => companion.newChat());
   handle('kuromi:configure-ai', (configuration) => companion.configure(configuration));
@@ -280,11 +281,13 @@ async function start() {
   ]));
   tray.on('click', showPet);
   await petWindow.loadURL(RENDERER_URL);
-  if (store.recoveredFile) {
+  if (store.restoredBackup || store.recoveredFile) {
     await dialog.showMessageBox(petWindow, {
       type: 'warning', title: 'Your original journal is safe',
-      message: 'Kuromi could not read the saved journal and started a fresh one.',
-      detail: `The original file has been preserved at:\n${store.recoveredFile}`,
+      message: store.restoredBackup
+        ? 'Kuromi restored your tasks, notes and settings from the local backup.'
+        : 'Kuromi could not read the saved journal and started a fresh one.',
+      ...(store.recoveredFile ? { detail: `The original file has been preserved at:\n${store.recoveredFile}` } : {}),
     });
   }
   for (const event of ['display-removed', 'display-metrics-changed']) {

@@ -4,7 +4,7 @@ A personal Windows desktop companion using your downloaded Sketchfab Kuromi mode
 
 ## Start
 
-Run `release/Kuromi Desktop Setup 1.1.0.exe` to install Kuromi for your Windows account. Then search for **Kuromi Desktop** in Start. In Kuromi's **Settings**, turn on **Launch at Windows login** if you want her on the desktop when you sign in. Uninstall through Windows **Installed apps**. Your notes and chats are stored separately from the program files.
+Run `release/Kuromi Desktop Setup 1.1.1.exe` to install Kuromi for your Windows account. Then search for **Kuromi Desktop** in Start. In Kuromi's **Settings**, turn on **Launch at Windows login** if you want her on the desktop when you sign in. Uninstall through Windows **Installed apps**. Your notes and chats are stored separately from the program files.
 
 For the portable build, double-click `Launch Kuromi.lnk` in this project folder, or run `release/Kuromi Desktop-win32-x64/Kuromi Desktop.exe` after building. Keep the executable with the rest of that folder.
 
@@ -69,7 +69,7 @@ The model's character prompt draws on Kuromi's mischievous pride, My Melody riva
 
 ## Your data
 
-Tasks, thoughts, settings, and window position are stored in `%APPDATA%/kuromi-desktop/journal.json`. Conversation history (up to 40 messages), model selection, and recent daily greetings are stored separately in `companion.json`. Both files are local plaintext. The model receives a bounded recent chat context, with no automatic access to diary entries, tasks, files, or your browser. Saves use temporary files and atomic rename; unreadable files are preserved as `.corrupt-*` for recovery.
+Tasks, thoughts, settings, and window position are stored in `%APPDATA%/kuromi-desktop/journal.json`. Conversation history (up to 40 messages), model selection, and recent daily greetings are stored separately in `companion.json`. Both files are local plaintext. The model receives a bounded recent chat context, with no automatic access to diary entries, tasks, files, or your browser. Saved records load without waiting for the pet graphics or Ollama. Kuromi flushes each save to disk before replacing the old file and keeps a local `.bak` copy. If a primary file goes missing or becomes damaged, Kuromi restores a valid backup and preserves any damaged original as `.corrupt-*`.
 
 Windows startup is opt-in through Settings. There is no analytics, remote web content or account in Kuromi. Her original ChatGPT pet artwork is preserved locally for reference, the app icon and the compatibility fallback; the ChatGPT pet isn't modified.
 

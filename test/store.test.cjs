@@ -38,7 +38,7 @@ test('concurrent writes do not lose entries or leave temporary files', async (t)
   const state = await new Store(filePath).load();
   assert.equal(state.todos.length, 30);
   assert.equal(new Set(state.todos.map((entry) => entry.id)).size, 30);
-  assert.deepEqual(await fs.readdir(directory), ['journal.json']);
+  assert.deepEqual((await fs.readdir(directory)).sort(), ['journal.json', 'journal.json.bak']);
 });
 
 test('invalid payloads cannot change the saved state and a rejected mutation does not poison later writes', async (t) => {
@@ -74,7 +74,7 @@ test('a failed disk write leaves memory unchanged, removes temporary files, and 
   await fs.mkdir(filePath);
   await assert.rejects(store.addTodo('Could not save'));
   assert.deepEqual((await store.load()).todos.map((entry) => entry.text), ['Already saved']);
-  assert.deepEqual(await fs.readdir(directory), ['journal.json']);
+  assert.deepEqual((await fs.readdir(directory)).sort(), ['journal.json', 'journal.json.bak']);
   await fs.rmdir(filePath);
   const state = await store.addTodo('Retry succeeds');
   assert.deepEqual(state.todos.map((entry) => entry.text), ['Already saved', 'Retry succeeds']);
@@ -98,4 +98,40 @@ test('malformed valid JSON is also preserved instead of silently discarding entr
   await fs.writeFile(filePath, JSON.stringify({ version: 1, todos: [{ id: 'broken' }], thoughts: [] }));
   assert.equal((await store.load()).todos.length, 0);
   assert.ok(store.recoveredFile);
+});
+
+test('an interrupted save restores the latest tasks, notes and settings from the backup', async (t) => {
+  const { store, filePath } = await fixture(t);
+  await store.addTodo('Keep this task');
+  await store.addThought({ text: 'Keep this note', mood: 'dreamy' });
+  const saved = await store.updateSettings({ reducedMotion: true, scale: 1.1 });
+  const original = await fs.readFile(filePath, 'utf8');
+  assert.equal(await fs.readFile(`${filePath}.bak`, 'utf8'), original);
+
+  const damaged = '{"version":';
+  await fs.writeFile(filePath, damaged);
+  const recovered = new Store(filePath);
+  assert.deepEqual(await recovered.load(), saved);
+  assert.equal(recovered.restoredBackup, true);
+  assert.equal(await fs.readFile(recovered.recoveredFile, 'utf8'), damaged);
+  assert.equal(await fs.readFile(filePath, 'utf8'), original);
+
+  await fs.unlink(filePath);
+  const missing = new Store(filePath);
+  assert.deepEqual(await missing.load(), saved);
+  assert.equal(missing.restoredBackup, true);
+  assert.equal(await fs.readFile(filePath, 'utf8'), original);
+});
+
+test('a read error cannot replace saved data with an empty journal', async (t) => {
+  const { store, filePath } = await fixture(t);
+  const saved = await store.addTodo('Still here');
+  await fs.unlink(filePath);
+  await fs.mkdir(filePath);
+  const reopened = new Store(filePath);
+  await assert.rejects(reopened.load());
+  assert.ok((await fs.stat(filePath)).isDirectory());
+
+  await fs.rmdir(filePath);
+  assert.deepEqual(await reopened.load(), saved);
 });

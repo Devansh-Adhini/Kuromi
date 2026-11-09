@@ -54,6 +54,7 @@ function line(kind) {
   return selected;
 }
 const animator = new PetAnimator($('#pet-canvas'));
+animator.ready.catch((error) => console.error('Pet graphics:', error.message));
 
 function element(tag, className, text) {
   const node = document.createElement(tag);
@@ -662,7 +663,7 @@ async function initialize() {
   if (!api) throw new Error('Please launch Kuromi Desktop.exe or use npm start. This companion needs its desktop shell.');
   $('#panel').classList.add('busy');
   try {
-    [state] = await Promise.all([api.load(), animator.ready]);
+    state = await api.load();
     render();
     renderCompanion();
     selectTab('chat');
@@ -671,8 +672,12 @@ async function initialize() {
     animator.play('wave');
     document.body.dataset.ready = 'true';
   } finally { $('#panel').classList.remove('busy'); }
-  // Model startup and conversation storage must not block the independent tools.
-  try { companion = await api.getCompanion(); }
+  // Show saved conversations before waiting for the local model connection.
+  try {
+    companion = await api.getSavedCompanion();
+    renderCompanion();
+    companion = await api.getCompanion();
+  }
   catch (error) {
     companion.warning = 'The conversation could not be loaded. Your to-dos and diary are ready to use.';
     console.error('Local conversation:', error.message);

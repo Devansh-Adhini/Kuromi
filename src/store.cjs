@@ -1,8 +1,7 @@
 'use strict';
 
-const fs = require('node:fs/promises');
-const path = require('node:path');
 const { randomUUID } = require('node:crypto');
+const { loadSnapshot, saveSnapshot } = require('./persistence.cjs');
 
 const DEFAULT_SETTINGS = Object.freeze({
   alwaysOnTop: true,
@@ -82,32 +81,20 @@ class Store {
     this.loading = null;
     this.queue = Promise.resolve();
     this.recoveredFile = null;
+    this.restoredBackup = false;
   }
 
   async load() {
-    if (!this.loading) this.loading = this._load();
+    if (!this.loading) this.loading = this._load().catch((error) => { this.loading = null; throw error; });
     await this.loading;
     return structuredClone(this.state);
   }
 
   async _load() {
-    await fs.mkdir(path.dirname(this.filePath), { recursive: true });
-    let content;
-    try {
-      content = await fs.readFile(this.filePath, 'utf8');
-    } catch (error) {
-      if (error.code !== 'ENOENT') throw error;
-    }
-    if (content !== undefined) {
-      try {
-        this.state = validateSavedState(JSON.parse(content));
-      } catch {
-        // Preserve the original file for recovery instead of overwriting it.
-        this.recoveredFile = `${this.filePath}.corrupt-${Date.now()}-${randomUUID().slice(0, 8)}`;
-        await fs.rename(this.filePath, this.recoveredFile);
-      }
-    }
-    if (!this.state) this.state = { todos: [], thoughts: [], settings: { ...DEFAULT_SETTINGS } };
+    const saved = await loadSnapshot(this.filePath, (contents) => validateSavedState(JSON.parse(contents.toString('utf8'))));
+    this.state = saved.state ?? { todos: [], thoughts: [], settings: { ...DEFAULT_SETTINGS } };
+    this.recoveredFile = saved.recoveredFile ?? null;
+    this.restoredBackup = saved.restoredBackup ?? false;
   }
 
   mutate(update) {
@@ -115,14 +102,7 @@ class Store {
       await this.load();
       const draft = structuredClone(this.state);
       update(draft);
-      const temporaryPath = `${this.filePath}.${randomUUID()}.tmp`;
-      try {
-        await fs.writeFile(temporaryPath, `${JSON.stringify({ version: 1, ...draft }, null, 2)}\n`, { encoding: 'utf8', mode: 0o600 });
-        await fs.rename(temporaryPath, this.filePath);
-      } catch (error) {
-        await fs.unlink(temporaryPath).catch(() => {});
-        throw error;
-      }
+      await saveSnapshot(this.filePath, `${JSON.stringify({ version: 1, ...draft }, null, 2)}\n`);
       this.state = draft;
       return structuredClone(this.state);
     });

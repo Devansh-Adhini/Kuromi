@@ -3,6 +3,7 @@
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const { randomUUID } = require('node:crypto');
+const { loadSnapshot, saveSnapshot, writeAtomic } = require('./persistence.cjs');
 
 const DEFAULT_MODEL = 'llama3.2:3b';
 const HISTORY_LIMIT = 40;
@@ -108,17 +109,6 @@ function validateSavedState(raw) {
   return { model: raw.model.startsWith('gpt-') ? DEFAULT_MODEL : raw.model, history, greetings };
 }
 
-async function writeAtomic(filePath, contents) {
-  const temporaryPath = `${filePath}.${randomUUID()}.tmp`;
-  try {
-    await fs.writeFile(temporaryPath, contents, { mode: 0o600 });
-    await fs.rename(temporaryPath, filePath);
-  } catch (error) {
-    await fs.unlink(temporaryPath).catch(() => {});
-    throw error;
-  }
-}
-
 async function readLimitedBody(response, maximum) {
   if (!response.body) throw safeError('Ollama returned an empty response.');
   const reader = response.body.getReader();
@@ -151,6 +141,7 @@ class Companion {
     this.connected = false;
     this.warning = null;
     this.storageWarning = null;
+    this.savedLoading = null;
     this.loading = null;
     this.queue = Promise.resolve();
     this.controllers = new Set();
@@ -161,27 +152,32 @@ class Companion {
   }
 
   async load() {
-    if (!this.loading) this.loading = this._load();
+    if (!this.loading) {
+      this.loading = this.loadSaved().then(() => this._probe()).catch((error) => { this.loading = null; throw error; });
+    }
     await this.loading;
     return this.metadata();
   }
 
-  async _load() {
-    await fs.mkdir(this.directory, { recursive: true });
-    let content;
-    try { content = await fs.readFile(this.filePath); }
-    catch (error) { if (error.code !== 'ENOENT') throw error; }
-    if (content) {
-      try {
-        if (content.length > STREAM_LIMIT) throw new Error('Companion file is too large.');
-        this.state = validateSavedState(JSON.parse(content.toString('utf8')));
-      } catch {
-        await fs.rename(this.filePath, `${this.filePath}.corrupt-${Date.now()}-${randomUUID().slice(0, 8)}`);
-        this.storageWarning = 'The conversation file could not be read. Its original copy was preserved; your diary and to-dos are untouched.';
-      }
+  async loadSaved() {
+    if (!this.savedLoading) {
+      this.savedLoading = this._loadSaved().catch((error) => { this.savedLoading = null; throw error; });
     }
+    await this.savedLoading;
+    return this.metadata();
+  }
+
+  async _loadSaved() {
     // Legacy credential files are deliberately neither opened nor changed.
-    await this._probe();
+    const saved = await loadSnapshot(this.filePath, (contents) => {
+      if (contents.length > STREAM_LIMIT) throw new Error('Companion file is too large.');
+      return validateSavedState(JSON.parse(contents.toString('utf8')));
+    });
+    if (saved.state) this.state = saved.state;
+    if (saved.restoredBackup) this.storageWarning = 'Your conversation was restored from a local backup.';
+    else if (saved.recoveredFile) {
+      this.storageWarning = 'The conversation file could not be read. Its original copy was preserved.';
+    }
   }
 
   isConfigured() {
@@ -189,10 +185,11 @@ class Companion {
   }
 
   metadata() {
+    const warning = [this.storageWarning, this.warning].filter(Boolean).join(' ');
     return structuredClone({
       configured: this.isConfigured(), provider: 'ollama', model: this.state.model, models: this.models,
       history: this.state.history, greeting: this.state.greetings.at(-1) || null,
-      ...((this.warning || this.storageWarning) ? { warning: this.warning || this.storageWarning } : {}),
+      ...(warning ? { warning } : {}),
     });
   }
 
@@ -250,7 +247,7 @@ class Companion {
       await this.load();
       const state = structuredClone(this.state);
       action(state);
-      await writeAtomic(this.filePath, `${JSON.stringify({ version: 1, ...state }, null, 2)}\n`);
+      await saveSnapshot(this.filePath, `${JSON.stringify({ version: 1, ...state }, null, 2)}\n`);
       this.state = state;
       return this.metadata();
     });

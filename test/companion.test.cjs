@@ -303,3 +303,26 @@ test('legacy provider metadata migrates to the local default while preserving ex
   assert.equal(metadata.model, DEFAULT_MODEL);
   assert.deepEqual(metadata.history, history);
 });
+
+test('saved chat is restored from the backup before checking Ollama', async (t) => {
+  const { companion, create, directory } = await fixture(t);
+  const saved = await companion.chat({ text: 'Keep this conversation', requestId: 'backup' });
+  const filePath = path.join(directory, 'companion.json');
+  const original = await fs.readFile(filePath, 'utf8');
+  assert.equal(await fs.readFile(`${filePath}.bak`, 'utf8'), original);
+  await fs.unlink(filePath);
+
+  let probes = 0;
+  const reopened = create({ fetchImpl: async () => { probes++; throw new Error('Connection refused'); } });
+  const cached = await reopened.loadSaved();
+  assert.deepEqual(cached.history, saved.history);
+  assert.match(cached.warning, /restored from a local backup/);
+  assert.equal(probes, 0);
+  assert.equal(await fs.readFile(filePath, 'utf8'), original);
+
+  const [loaded] = await Promise.all([reopened.load(), reopened.load()]);
+  assert.deepEqual(loaded.history, saved.history);
+  assert.equal(loaded.configured, false);
+  assert.match(loaded.warning, /Ollama is not available/);
+  assert.equal(probes, 1);
+});

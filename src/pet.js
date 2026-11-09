@@ -142,7 +142,8 @@ export class PetAnimator {
 
   setScale(value) {
     if (!Number.isFinite(value)) throw new TypeError('Pet size must be a number.');
-    this.scale = clamp(value, 0.65, 1.5); this.resize();
+    this.scale = clamp(value, 0.65, 1.5);
+    if (this.loaded) this.resize();
   }
 
   hitTest(clientX, clientY, refresh = false) {
