@@ -16,7 +16,9 @@ const thought = 'A small thought — saved privately, even after restarting. <sc
 const model = 'llama3.2:3b';
 const chatText = 'I had a long day today.';
 const chatReply = 'You made it through today. Come sit with me for a minute. We can take the next little thing slowly. ♡';
-const newGestures = ['nod', 'head-shake', 'smug', 'beckon', 'tiptoe', 'curtsy', 'yawn', 'fist-pump'];
+const newGestures = ['nod', 'head-shake', 'smug', 'beckon', 'tiptoe', 'curtsy', 'yawn', 'fist-pump',
+  'air-kiss', 'royal-wave', 'happy-sway', 'foot-tap', 'peekaboo', 'ear-perk', 'bashful', 'bow',
+  'shoulder-shimmy', 'double-wave', 'head-bob', 'curious-lean', 'proud-stance', 'sleepy-sway', 'little-stomp', 'delighted-hop'];
 let application;
 let page;
 const errors = [];
@@ -433,7 +435,7 @@ async function main() {
     assert.equal(saved.todos.length, 1);
     assert.equal(saved.todos[0].text, task);
     assert.equal(saved.todos[0].done, false);
-    await page.waitForFunction(() => globalThis.__observedAnimations.some(name => ['beckon', 'smug'].includes(name)));
+    await page.waitForFunction(() => globalThis.__observedAnimations.some(name => ['beckon', 'smug', 'proud-stance'].includes(name)));
 
     await page.locator('#close-panel').click();
     await page.locator('#pet-button').hover();
@@ -448,7 +450,7 @@ async function main() {
     await page.evaluate(() => { globalThis.__observedAnimations.length = 0; });
     await page.getByRole('button', { name: `Complete ${task}`, exact: true }).or(page.getByRole('checkbox', { name: `Complete ${task}`, exact: true })).click();
     await page.waitForFunction(async () => (await window.kuromi.load()).todos[0]?.done === true);
-    await page.waitForFunction(() => globalThis.__observedAnimations.some(name => ['dance', 'fist-pump'].includes(name)));
+    await page.waitForFunction(() => globalThis.__observedAnimations.some(name => ['dance', 'fist-pump', 'royal-wave', 'double-wave'].includes(name)));
     await page.locator('#close-panel').click();
     await page.locator('#pet-button').hover();
     await page.waitForTimeout(250);

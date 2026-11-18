@@ -7,6 +7,7 @@
   <title>Kuromi's little corner</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="companion.css">
+  <link rel="stylesheet" href="aura.css">
   <script type="importmap">{"imports":{"three":"../node_modules/three/build/three.module.js"}}</script>
   <script src="app.js" type="module"></script>
 </head>
@@ -63,6 +64,7 @@
             <label id="launch-at-login-setting" class="setting" hidden><span><strong>Launch at Windows login</strong></span><input id="launch-at-login" type="checkbox" role="switch"></label>
             <label class="setting"><span><strong>Always on top</strong></span><input id="always-on-top" type="checkbox" role="switch"></label>
             <label class="setting"><span><strong>Wander when idle</strong></span><input id="roaming" type="checkbox" role="switch"></label>
+            <label class="setting"><span><strong>Mischief aura</strong><small>Purple glow &amp; floating hearts</small></span><input id="aura" type="checkbox" role="switch"></label>
             <label class="setting"><span><strong>Reduced motion</strong></span><input id="reduced-motion" type="checkbox" role="switch"></label>
             <label class="setting size-setting"><span><strong>Pet size</strong><small id="size-label">100%</small></span><input id="pet-scale" type="range" min="0.75" max="1.25" step="0.05" value="1" aria-label="Pet size"></label>
           </div>
@@ -75,6 +77,7 @@
     <section id="hover-card" class="hover-card" data-interactive hidden aria-label="Unfinished to-dos"><div class="hover-heading"><span class="eyebrow">OUR LITTLE PLANS</span><span id="hover-count"></span></div><div id="hover-todos"></div><button id="hover-open" class="text-button">Open my list ↗</button></section>
     <div id="speech" class="speech" data-interactive role="status" hidden></div>
     <div id="pet-stage" class="pet-stage">
+      <div id="pet-aura" class="pet-aura" aria-hidden="true" hidden><div class="aura-glow"></div><div class="aura-ring"></div><span>♥</span><span>♥</span><span>♥</span><span>♥</span><span>♥</span><span>♥</span><span>✦</span><span>✧</span></div>
       <button id="pet-button" class="pet-button" data-interactive aria-label="Kuromi — click for tools, drag to move" aria-expanded="true" title="Click for my corner · drag to move"><canvas id="pet-canvas" width="192" height="208" aria-hidden="true"></canvas></button>
     </div>
     <div id="toast" data-interactive role="status" hidden></div>

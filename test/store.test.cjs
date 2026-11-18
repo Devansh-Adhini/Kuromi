@@ -23,7 +23,7 @@ test('tasks, thoughts, settings and position survive a new store instance', asyn
   state = await store.toggleTodo(id);
   assert.equal(state.todos[0].done, true);
   await store.addThought({ text: 'A good day.\nA little dreamy.', mood: 'dreamy' });
-  await store.updateSettings({ reducedMotion: true, scale: 1.2 });
+  await store.updateSettings({ reducedMotion: true, scale: 1.2, aura: true });
   state = await store.updatePosition({ x: -400, y: 125 });
   assert.deepEqual(await new Store(filePath).load(), state);
   state = await store.deleteTodo(id);

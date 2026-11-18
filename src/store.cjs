@@ -7,6 +7,7 @@ const DEFAULT_SETTINGS = Object.freeze({
   alwaysOnTop: true,
   roaming: false,
   reducedMotion: false,
+  aura: false,
   scale: 1,
 });
 const MOODS = new Set(['neutral', 'happy', 'sad', 'frustrated', 'dreamy']);

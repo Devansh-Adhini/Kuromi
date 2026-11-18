@@ -201,6 +201,196 @@ export function evaluateRigPose(name, elapsed, { time = elapsed, lookX = 0, look
       pose.leftEar += pump * envelope * 0.04;
       break;
     }
+    case 'air-kiss': {
+      const envelope = s(Math.min(1, t / 3.6) * Math.PI) ** 2;
+      const release = (1 - Math.cos(Math.min(1, t / 2.7) * Math.PI)) / 2;
+      pose.rightArmX = (-1.05 + release * 0.9) * envelope;
+      pose.rightArmZ = 0.12 + (0.2 + release * 0.95) * envelope;
+      pose.headYaw = -0.1 * envelope;
+      pose.headRoll = 0.08 * envelope;
+      pose.headPitch = -0.045 * envelope;
+      pose.leftEar += 0.055 * envelope;
+      break;
+    }
+    case 'royal-wave': {
+      const envelope = s(Math.min(1, t / 4.2) * Math.PI) ** 2;
+      pose.leftArmZ = -0.12 - (1.04 + s(t * 4.3) * 0.2) * envelope;
+      pose.leftArmX = s(t * 4.3 - 0.5) * envelope * 0.1;
+      pose.bodyYaw = -0.16 * envelope;
+      pose.headYaw = 0.18 * envelope;
+      pose.headPitch = -0.08 * envelope;
+      pose.headRoll = 0.045 * envelope;
+      break;
+    }
+    case 'happy-sway': {
+      const envelope = s(Math.min(1, t / 4.8) * Math.PI) ** 2;
+      const sway = s(t * 3.2) * envelope;
+      pose.rootX = sway * 0.065;
+      pose.bodyRoll = sway * 0.055;
+      pose.bodyYaw = sway * 0.14;
+      pose.headRoll = -sway * 0.065;
+      pose.leftArmZ = -0.12 - (0.6 + s(t * 3.2 + 0.5) * 0.14) * envelope;
+      pose.rightArmZ = 0.12 + (0.6 - s(t * 3.2 + 0.5) * 0.14) * envelope;
+      pose.leftLegX = sway * 0.12;
+      pose.rightLegX = -pose.leftLegX;
+      break;
+    }
+    case 'foot-tap': {
+      const envelope = s(Math.min(1, t / 3.6) * Math.PI) ** 2;
+      const tap = (1 - Math.cos(t * 9)) / 2;
+      pose.rightLegX = -tap * envelope * 0.3;
+      pose.rootY += tap * envelope * 0.012;
+      pose.headYaw = -0.22 * envelope;
+      pose.headPitch = -0.045 * envelope;
+      pose.leftArmX = -0.4 * envelope;
+      pose.leftArmZ = -0.12 - 0.28 * envelope;
+      pose.rightEar -= 0.055 * envelope;
+      break;
+    }
+    case 'peekaboo': {
+      const envelope = s(Math.min(1, t / 3.6) * Math.PI) ** 2;
+      const peek = s(t * 3.5) * envelope;
+      pose.headYaw = peek * 0.48;
+      pose.headRoll = -peek * 0.09;
+      pose.bodyYaw = -peek * 0.12;
+      pose.rootX = peek * 0.045;
+      pose.leftArmX = pose.rightArmX = -0.7 * envelope;
+      pose.leftArmZ = -0.12 - 0.45 * envelope;
+      pose.rightArmZ = 0.12 + 0.45 * envelope;
+      pose.leftEar += peek * 0.07;
+      pose.rightEar -= peek * 0.07;
+      break;
+    }
+    case 'ear-perk': {
+      const envelope = s(Math.min(1, t / 2.4) * Math.PI) ** 2;
+      pose.leftEar = -0.13 * envelope;
+      pose.rightEar = 0.13 * envelope;
+      pose.headPitch = -0.11 * envelope;
+      pose.headYaw = s(t * 1.8) * envelope * 0.16;
+      pose.rightArmZ = 0.12 + 0.2 * envelope;
+      break;
+    }
+    case 'bashful': {
+      const envelope = s(Math.min(1, t / 4.2) * Math.PI) ** 2;
+      pose.headPitch = 0.2 * envelope;
+      pose.headYaw = s(t * 1.1) * envelope * 0.18;
+      pose.headRoll = -0.08 * envelope;
+      pose.leftArmX = pose.rightArmX = -0.6 * envelope;
+      pose.leftArmZ = -0.12 + 0.38 * envelope;
+      pose.rightArmZ = 0.12 - 0.38 * envelope;
+      pose.leftLegX = 0.07 * envelope;
+      pose.rightLegX = -0.07 * envelope;
+      pose.leftEar += 0.075 * envelope;
+      pose.rightEar -= 0.075 * envelope;
+      break;
+    }
+    case 'bow': {
+      const envelope = s(Math.min(1, t / 3.2) * Math.PI) ** 2;
+      pose.headPitch = 0.32 * envelope;
+      pose.headRoll = -0.025 * envelope;
+      pose.rootY -= 0.025 * envelope;
+      pose.leftArmX = pose.rightArmX = 0.15 * envelope;
+      pose.leftArmZ = -0.12 - 0.6 * envelope;
+      pose.rightArmZ = 0.12 + 0.6 * envelope;
+      pose.leftEar += 0.035 * envelope;
+      pose.rightEar -= 0.035 * envelope;
+      break;
+    }
+    case 'shoulder-shimmy': {
+      const envelope = s(Math.min(1, t / 4) * Math.PI) ** 2;
+      const shimmy = s(t * 8) * envelope;
+      pose.bodyYaw = shimmy * 0.16;
+      pose.bodyRoll = shimmy * 0.035;
+      pose.headYaw = -shimmy * 0.1;
+      pose.headRoll = -shimmy * 0.035;
+      pose.leftArmX = shimmy * 0.23;
+      pose.rightArmX = -pose.leftArmX;
+      pose.leftArmZ = -0.12 - 0.62 * envelope;
+      pose.rightArmZ = 0.12 + 0.62 * envelope;
+      break;
+    }
+    case 'double-wave': {
+      const envelope = s(Math.min(1, t / 3.6) * Math.PI) ** 2;
+      pose.leftArmZ = -0.12 - (1.05 + s(t * 6.5) * 0.22) * envelope;
+      pose.rightArmZ = 0.12 + (1.05 + s(t * 6.5 + 0.7) * 0.22) * envelope;
+      pose.leftArmX = s(t * 6.5 - 0.5) * envelope * 0.1;
+      pose.rightArmX = s(t * 6.5 + 0.2) * envelope * 0.1;
+      pose.headRoll = s(t * 2) * envelope * 0.07;
+      break;
+    }
+    case 'head-bob': {
+      const envelope = s(Math.min(1, t / 3.6) * Math.PI) ** 2;
+      const beat = s(t * 7) * envelope;
+      pose.headPitch = beat * 0.13;
+      pose.headRoll = s(t * 3.5) * envelope * 0.06;
+      pose.bodyYaw = s(t * 3.5) * envelope * 0.08;
+      pose.rightLegX = beat * 0.08;
+      pose.rightArmZ = 0.12 + 0.3 * envelope;
+      break;
+    }
+    case 'curious-lean': {
+      const envelope = s(Math.min(1, t / 4) * Math.PI) ** 2;
+      pose.rootX = 0.035 * envelope;
+      pose.bodyRoll = -0.018 * envelope;
+      pose.headRoll = -0.08 * envelope;
+      pose.headYaw = (0.18 + s(t * 1.6) * 0.1) * envelope;
+      pose.headPitch = 0.08 * envelope;
+      pose.leftArmX = -0.35 * envelope;
+      pose.leftArmZ = -0.12 - 0.32 * envelope;
+      pose.rightEar += 0.08 * envelope;
+      break;
+    }
+    case 'proud-stance': {
+      const envelope = s(Math.min(1, t / 3.8) * Math.PI) ** 2;
+      pose.headPitch = -0.13 * envelope;
+      pose.headYaw = 0.16 * envelope;
+      pose.headRoll = 0.035 * envelope;
+      pose.bodyYaw = -0.12 * envelope;
+      pose.leftArmX = pose.rightArmX = -0.4 * envelope;
+      pose.leftArmZ = -0.12 - 0.48 * envelope;
+      pose.rightArmZ = 0.12 + 0.48 * envelope;
+      pose.leftEar -= 0.045 * envelope;
+      pose.rightEar += 0.045 * envelope;
+      break;
+    }
+    case 'sleepy-sway': {
+      const envelope = s(Math.min(1, t / 5.2) * Math.PI) ** 2;
+      const sway = s(t * 1.3) * envelope;
+      pose.bodyRoll = sway * 0.04;
+      pose.headRoll = sway * 0.13;
+      pose.headPitch = 0.18 * envelope;
+      pose.leftArmZ = -0.12 + 0.08 * envelope;
+      pose.rightArmZ = 0.12 - 0.08 * envelope;
+      pose.blink = Math.max(pose.blink, envelope);
+      pose.leftEar += 0.06 * envelope;
+      pose.rightEar -= 0.06 * envelope;
+      break;
+    }
+    case 'little-stomp': {
+      const envelope = s(Math.min(1, t / 3) * Math.PI) ** 2;
+      const step = (1 - Math.cos(t * 8)) / 2 * envelope;
+      pose.leftLegX = -0.28 * step;
+      pose.rootY -= 0.015 * step;
+      pose.headPitch = -0.075 * envelope;
+      pose.headYaw = -0.18 * envelope;
+      pose.leftArmZ = -0.12 - 0.34 * envelope;
+      pose.rightArmZ = 0.12 + 0.34 * envelope;
+      pose.rightEar -= 0.08 * envelope;
+      break;
+    }
+    case 'delighted-hop': {
+      const envelope = s(Math.min(1, t / 3.4) * Math.PI) ** 2;
+      const hop = s(t * 4.4) ** 2 * envelope;
+      pose.rootY += hop * 0.22;
+      pose.leftArmZ = -0.12 - (0.45 + hop * 0.6) * envelope;
+      pose.rightArmZ = 0.12 + (0.45 + hop * 0.6) * envelope;
+      pose.leftLegX = hop * 0.15;
+      pose.rightLegX = -pose.leftLegX;
+      pose.headRoll = s(t * 2.2) * envelope * 0.06;
+      pose.leftEar += hop * 0.05;
+      pose.rightEar -= hop * 0.05;
+      break;
+    }
   }
   if (talking || name === 'talk') {
     pose.mouth = 0.2 + Math.abs(s(t * 11) * s(t * 7.3)) * 0.8;

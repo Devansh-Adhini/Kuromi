@@ -1,25 +1,28 @@
 /* Dark Kuromi corner. Base layout lives in styles.css. */
 :root { color-scheme: dark; color: #eee5f5; --paper:#19161f; --soft:#26202e; --line:#3a3045; --ink:#f1e7f7; --muted:#b6a4c2; --purple:#c5a2dd; --pink:#ed93c1; }
-.panel { background:#19161f; border-color:#4b3859; box-shadow:0 12px 35px #0007; }
-.panel-header { padding:13px 17px; gap:10px; background:#221b2b; }
-.brand-mark { width:33px; height:35px; font-size:24px; border-radius:10px; background:#382440; color:#f1a6ce; box-shadow:none; }
+.panel { background:#19161f; border-color:#62466f; border-radius:24px; box-shadow:0 18px 45px #0008,0 0 0 1px #c78ae00b,inset 0 1px 0 #f5c8ff14; }
+.panel-header { padding:13px 17px; gap:10px; background:radial-gradient(ellipse at 90% 0,#70437050,transparent 70%),linear-gradient(115deg,#2c2036,#211a29); border-bottom:1px solid #e0a6cf14; }
+.brand-mark { width:33px; height:35px; font-size:24px; border:1px solid #cb8db057; border-radius:11px; background:linear-gradient(145deg,#54304f,#2f203e); color:#ffc7e5; box-shadow:0 4px 12px #0003,inset 0 1px 0 #ffe0f51c; }
 h1 { margin:0; font-size:17px; color:#f7eefc; }
-.close { width:32px; height:32px; margin-top:0; margin-right:-5px; color:#baa3c8; }
-.tabs { height:42px; padding-inline:10px; gap:1px; border-color:#352a40; background:#1f1928; }
-.tab { padding-inline:5px; font-size:10.5px; gap:4px; color:#b7a4c2; }
-.tab.active { color:#f0a4ce; border-color:#df8dbd; background:#302037; }
+.close { width:32px; height:32px; margin-top:0; margin-right:-5px; color:#d8b9e7; border-radius:10px; }
+.close:hover { background:#b882ce1a; color:#fff0fa; }
+.tabs { height:42px; padding-inline:10px; gap:2px; border-color:#47324f; background:#1c1723; }
+.tab { padding-inline:5px; margin-block:5px; font-size:10.5px; gap:4px; color:#c1accd; border-radius:8px; }
+.tab.active { color:#ffbfdf; border-color:#df8dbd; background:linear-gradient(135deg,#4b2b4c,#34223f); box-shadow:inset 0 0 0 1px #d591c52b; }
+.tab.active:after { background:transparent; }
 .tab:hover { color:#fff0fa; background:#30263a; }
 .panel-content { height:348px; scrollbar-color:#60466e transparent; }
 .view { padding:17px 20px; }
 .section-heading { margin-bottom:15px; }
 .section-heading h2 { font-size:22px; margin-top:0; color:#f3e7fa; }
 .section-heading p, .field-label, .mood-label { font-size:11px; color:#b9a6c6; }
-input:not([type=checkbox]):not([type=range]),textarea,select,.ai-connection select { background:#241e2d; border:1px solid #4a3858; color:#f1e5fa; font-size:12px; }
+input:not([type=checkbox]):not([type=range]),textarea,select,.ai-connection select { background:#211a2a; border:1px solid #503b5f; color:#f1e5fa; font-size:12px; box-shadow:inset 0 1px 3px #0002; }
 input::placeholder,textarea::placeholder { color:#a18cae; font-size:11px; }
-input:focus,textarea:focus,select:focus { border-color:#cf88b8; }
-.primary { min-height:32px; font-size:11px; background:#8b4f85; color:#fff6fd; box-shadow:none; }
-.primary:hover { background:#a25d98; }
-.secondary { min-height:30px; font-size:10px; background:#302539; border:1px solid #574161; color:#e1c9ee; }
+input:focus,textarea:focus,select:focus { border-color:#da9dcb; box-shadow:0 0 0 3px #bb7ad518; }
+.primary { min-height:32px; font-size:11px; border:1px solid #cb8ab14d; background:linear-gradient(135deg,#96517e,#70468f); color:#fff6fd; box-shadow:0 3px 8px #0003,inset 0 1px 0 #ffe7fa1c; }
+.primary:hover { background:linear-gradient(135deg,#ad6395,#8a58a8); }
+.secondary { min-height:30px; font-size:10px; background:linear-gradient(135deg,#3a2a46,#2c2236); border:1px solid #6a4b78; color:#eed5fa; }
+.secondary:hover { border-color:#bc86bf; background:#46314f; }
 .text-button { min-height:26px; font-size:10px; color:#d4acdf; }
 .list-heading { font-size:8px; letter-spacing:.7px; color:#b4a0c1; }
 .todo-entry { background:#251c2f; border-color:#5b416c; }
@@ -28,7 +31,7 @@ input:focus,textarea:focus,select:focus { border-color:#cf88b8; }
 .todo-text,.thought-entry p { font-size:12px; color:#e6d9ef; }
 .todo-entry.done .todo-text { color:#bca7c8; }
 .delete-button { width:28px; min-height:28px; padding:0; font-size:17px; color:#e7afd4; background:transparent; opacity:1; }
-.thought-entry { background:#231b2b; border-color:#403049; }
+.thought-entry { background:linear-gradient(135deg,#2a1f32,#211a29); border-color:#53385f; box-shadow:inset 3px 0 0 #a575b34d; }
 .thought-meta { font-size:10px; color:#b79ac8; }
 .mood-tag { font-size:9px; background:#372840; color:#dfb9dd; }
 .empty-state { font-size:11px; color:#c7b4d3; background:transparent; border-color:#60496f; }
@@ -48,18 +51,21 @@ input:focus,textarea:focus,select:focus { border-color:#cf88b8; }
 .chat-toolbar { display:flex; justify-content:flex-end; flex-shrink:0; }
 #new-chat { padding:5px 10px; }
 .chat-log { flex:1; min-height:0; overflow-y:auto; scrollbar-width:thin; scrollbar-color:#60466e transparent; padding:0 3px 2px; user-select:text; }
-.chat-message { border:1px solid #44304f; background:#251c2f; border-radius:12px 12px 12px 3px; padding:11px 13px; margin:0 22px 10px 0; }
-.chat-message.user { margin:0 0 10px 22px; border-radius:12px 12px 3px 12px; background:#38253e; border-color:#67456c; }
+.chat-message { border:1px solid #52365f; background:linear-gradient(135deg,#2d2038,#241b2e); border-radius:15px 15px 15px 5px; padding:11px 13px; margin:0 22px 10px 0; box-shadow:0 3px 8px #0002,inset 0 1px 0 #e4b4ff08; }
+.chat-message.user { margin:0 0 10px 22px; border-radius:15px 15px 5px 15px; background:linear-gradient(135deg,#452a48,#35263f); border-color:#805278; }
+.chat-message.greeting { border-color:#815477; background:radial-gradient(ellipse at 100% 0,#a9579030,transparent 75%),#302037; }
 .message-author { font-size:8px; font-weight:650; letter-spacing:1.25px; color:#e1a3cb; }
 #greeting-date { font-size:8px; color:#af93c0; letter-spacing:.7px; }
-.chat-message p { margin:5px 0 0; color:#eadcf2; font-size:12px; line-height:1.75; white-space:pre-wrap; overflow-wrap:anywhere; }
+.chat-message p { margin:5px 0 0; color:#f1e5f8; font-size:12px; line-height:1.75; white-space:pre-wrap; overflow-wrap:anywhere; }
 .message-note { display:block; color:#b79bc5; font-size:9px; line-height:1.5; margin-top:7px; }
 .message-note:empty { display:none; }
 .streaming { border-color:#bd80b0; }
 .streaming p:after { content:''; display:inline-block; vertical-align:-.1em; width:2px; height:12px; margin-left:3px; background:#e69bc8; animation:cursor-pulse 1s ease-in-out infinite; }
 .chat-connect-note { flex-shrink:0; display:flex; align-items:center; justify-content:space-between; font-size:10px; color:#bea6cc; padding:0 3px; gap:9px; }
-.chat-compose { flex-shrink:0; border-top:1px solid #392c43; padding-top:10px; }
-.chat-compose textarea { min-height:58px; max-height:90px; resize:none; padding:9px 11px; }
+.chat-compose { flex-shrink:0; border:1px solid #654572; border-radius:16px; padding:4px 8px 8px; background:linear-gradient(145deg,#2a2034,#211a2a); box-shadow:0 -4px 18px #0002,inset 0 1px 0 #efb4e612; }
+.chat-compose:focus-within { border-color:#c98fbd; box-shadow:0 0 0 3px #bf8ed00f; }
+.chat-compose textarea { min-height:54px; max-height:86px; resize:none; padding:9px 4px; border:0; background:transparent; box-shadow:none; }
+.chat-compose textarea:focus { outline:none; box-shadow:none; }
 .chat-compose-actions { display:flex; justify-content:flex-end; align-items:center; gap:7px; margin-top:6px; }
 #chat-send { padding:6px 11px; }
 .ai-connection { border-bottom:1px solid #392c43; margin-bottom:17px; padding-bottom:16px; }
@@ -75,7 +81,7 @@ input:focus,textarea:focus,select:focus { border-color:#cf88b8; }
 .connection-footer button { margin-top:7px; }
 .connection-warning { background:#382333; color:#efc4dc; padding:8px 10px; margin:10px 0 0; border-radius:7px; font-size:10px; line-height:1.7; }
 .about-note { line-height:1.8; }
-.hover-card,.speech { background:#201927f7; color:#e9d8f1; border-color:#5c426b; }
+.hover-card,.speech { background:linear-gradient(140deg,#302037f7,#201927fa); color:#f2e2fa; border-color:#886196; box-shadow:0 10px 26px #0005,inset 0 1px 0 #efc5ff12; }
 .hover-card:after,.speech:after { background:#201927; border-color:#5c426b; }
 .hover-card .todo-text { font-size:12px; color:#eadcf2; }
 .hover-heading,.hover-card .eyebrow { color:#d9b5df; }

@@ -1,0 +1,62 @@
+/* Decorative effects stay outside the character's click and drag silhouette. */
+.pet-aura {
+  position:absolute;
+  bottom:0;
+  left:50%;
+  width:270px;
+  height:230px;
+  transform:translateX(-50%) scale(var(--pet-scale,1));
+  transform-origin:50% 100%;
+  pointer-events:none;
+  user-select:none;
+}
+.pet-aura * { pointer-events:none; }
+.pet-button { position:relative; }
+.aura-glow {
+  position:absolute;
+  inset:9px 19px 3px;
+  border-radius:50%;
+  background:radial-gradient(ellipse,#8a40d133 0%,#8737c94d 35%,#6b2ca426 58%,transparent 73%);
+  animation:aura-breathe 4.8s ease-in-out infinite;
+}
+.aura-ring {
+  position:absolute;
+  left:56px;
+  right:56px;
+  bottom:6px;
+  height:25px;
+  border:1px solid #c290f0aa;
+  border-radius:50%;
+  box-shadow:0 0 12px #a562e58c,inset 0 0 12px #8743c978;
+  animation:aura-breathe 4.8s ease-in-out infinite reverse;
+}
+.pet-aura span {
+  position:absolute;
+  font-family:'Segoe UI Symbol','Segoe UI',sans-serif;
+  font-size:20px;
+  line-height:1;
+  color:#b887ef;
+  text-shadow:0 0 8px #8c4cd9aa;
+  opacity:.8;
+  animation:aura-float 5.8s ease-in-out infinite;
+}
+.pet-aura span:nth-of-type(1) { left:21px; top:80px; color:#17101f; -webkit-text-stroke:1px #b17ce0; animation-delay:-1.2s; }
+.pet-aura span:nth-of-type(2) { right:15px; top:108px; font-size:25px; animation-delay:-3.6s; }
+.pet-aura span:nth-of-type(3) { left:42px; top:153px; font-size:16px; animation-delay:-4.8s; }
+.pet-aura span:nth-of-type(4) { right:42px; top:48px; color:#17101f; -webkit-text-stroke:1px #c093e8; font-size:18px; animation-delay:-2.4s; }
+.pet-aura span:nth-of-type(5) { left:71px; top:27px; font-size:13px; animation-delay:-.5s; }
+.pet-aura span:nth-of-type(6) { right:35px; top:175px; color:#17101f; -webkit-text-stroke:1px #b17ce0; font-size:17px; animation-delay:-4s; }
+.pet-aura span:nth-of-type(7) { left:15px; top:127px; font-size:13px; color:#e3c5ff; animation-delay:-3s; }
+.pet-aura span:nth-of-type(8) { right:10px; top:75px; font-size:14px; color:#e3c5ff; animation-delay:-1.8s; }
+.pet-aura.paused * { animation-play-state:paused; }
+@keyframes aura-float {
+  0%,100% { transform:translate(0,4px) rotate(-10deg); opacity:.45; }
+  50% { transform:translate(5px,-12px) rotate(10deg); opacity:.95; }
+}
+@keyframes aura-breathe {
+  0%,100% { opacity:.65; transform:scale(.94); }
+  50% { opacity:1; transform:scale(1.04); }
+}
+@media (prefers-reduced-motion:reduce) {
+  .pet-aura * { animation:none; }
+}

@@ -22,7 +22,9 @@ test('new gestures contain distinct continuous motion at high refresh rates', as
     import(pathToFileURL(path.join(__dirname, '../src/pet.js')).href),
     import(pathToFileURL(path.join(__dirname, '../src/rig-pose.js')).href),
   ]);
-  const names = ['nod', 'head-shake', 'smug', 'beckon', 'tiptoe', 'curtsy', 'yawn', 'fist-pump'];
+  const names = ['nod', 'head-shake', 'smug', 'beckon', 'tiptoe', 'curtsy', 'yawn', 'fist-pump',
+    'air-kiss', 'royal-wave', 'happy-sway', 'foot-tap', 'peekaboo', 'ear-perk', 'bashful', 'bow',
+    'shoulder-shimmy', 'double-wave', 'head-bob', 'curious-lean', 'proud-stance', 'sleepy-sway', 'little-stomp', 'delighted-hop'];
   const trajectories = new Set();
   for (const name of names) {
     const duration = ANIMATIONS[name].duration / 1000;

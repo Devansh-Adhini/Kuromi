@@ -7,12 +7,14 @@ const { pathToFileURL } = require('node:url');
 const { spawn } = require('node:child_process');
 const { Store, validatePosition } = require('./store.cjs');
 const { Companion } = require('./companion.cjs');
+const { prepareProfile } = require('./profile.cjs');
 
 const RENDERER_URL = pathToFileURL(path.join(__dirname, 'index.html')).href;
 const STARTUP_NAME = 'KuromiDesktop';
 const canStartAtLogin = process.platform === 'win32' && app.isPackaged;
 let ownedOllama;
 let petWindow;
+let workspaceReady = false;
 let tray;
 let store;
 let companion;
@@ -118,7 +120,7 @@ function rememberPosition() {
 }
 
 function showPet() {
-  if (!petWindow || petWindow.isDestroyed()) return;
+  if (!workspaceReady || !petWindow || petWindow.isDestroyed() || quitting) return;
   petWindow.show();
   petWindow.focus();
 }
@@ -144,6 +146,16 @@ function trayImage() {
 
 function registerIPC() {
   handle('kuromi:load', () => store.load());
+  handle('kuromi:workspace-ready', () => {
+    if (workspaceReady || quitting) return;
+    workspaceReady = true;
+    petWindow.show();
+  });
+  handle('kuromi:startup-failed', () => {
+    if (workspaceReady || quitting) return;
+    dialog.showErrorBox('Kuromi could not open the workspace', 'Close Kuromi and try opening her again.');
+    app.quit();
+  });
   handle('kuromi:get-startup', startupSettings);
   handle('kuromi:set-startup', (enabled) => {
     if (!canStartAtLogin || typeof enabled !== 'boolean') throw new Error('Launch at login is available in the Windows build.');
@@ -219,10 +231,16 @@ function registerIPC() {
 
 async function start() {
   Menu.setApplicationMenu(null);
-  store = new Store(path.join(app.getPath('userData'), 'journal.json'));
-  companion = new Companion({ directory: app.getPath('userData'), ensureService: startInstalledOllama,
+  const legacy = app.getPath('userData');
+  const dataPath = process.platform === 'win32' && process.env.LOCALAPPDATA && (app.isPackaged || !process.env.KUROMI_USER_DATA)
+    ? path.join(process.env.LOCALAPPDATA, 'Kuromi Data') : legacy;
+  const directory = await prepareProfile(legacy, dataPath);
+  if (quitting) return;
+  store = new Store(path.join(directory, 'journal.json'));
+  companion = new Companion({ directory, ensureService: startInstalledOllama,
     getTodos: async () => (await store.load()).todos });
-  const state = await store.load();
+  const [state] = await Promise.all([store.load(), companion.loadSaved()]);
+  if (quitting) return;
   const area = screen.getPrimaryDisplay().workArea;
   const width = Math.min(460, area.width);
   const height = Math.min(740, area.height);
@@ -269,7 +287,6 @@ async function start() {
   petWindow.on('close', (event) => {
     if (!quitting) { event.preventDefault(); petWindow.hide(); }
   });
-  petWindow.once('ready-to-show', () => petWindow.show());
   registerIPC();
   tray = new Tray(trayImage());
   tray.setToolTip('Kuromi Desktop — click to bring her back');

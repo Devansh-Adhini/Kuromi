@@ -100,7 +100,7 @@ function scheduleSurface() {
   cancelAnimationFrame(surfaceFrame);
   surfaceFrame = requestAnimationFrame(async () => {
     if (!api?.setVisibleArea || !state) return;
-    const bounds = ['#pet-button', '#panel', '#hover-card', '#speech', '#toast']
+    const bounds = ['#pet-button', '#pet-aura', '#panel', '#hover-card', '#speech', '#toast']
       .map((selector) => $(selector))
       .filter((node) => node && !node.hidden && node.getClientRects().length)
       .map((node) => node.getBoundingClientRect());
@@ -179,7 +179,7 @@ function todoRow(todo, compact = false) {
     try {
       const lastPlan = !todo.done && state.todos.filter((entry) => !entry.done).length === 1;
       const reaction = todo.done ? chooseAnimation(['waiting', 'head-shake'])
-        : lastPlan ? chooseAnimation(['dance', 'fist-pump']) : chooseAnimation(['nod', 'fist-pump', 'excited']);
+        : lastPlan ? chooseAnimation(['dance', 'fist-pump', 'royal-wave', 'double-wave']) : chooseAnimation(['nod', 'fist-pump', 'excited', 'happy-sway', 'delighted-hop']);
       await mutate(() => api.toggleTodo(todo.id), line(todo.done ? 'reopen' : 'done'), reaction);
     } catch (error) { check.disabled = false; report(error); }
   });
@@ -249,6 +249,8 @@ function applySettings() {
   $('#always-on-top').checked = settings.alwaysOnTop;
   $('#roaming').checked = settings.roaming;
   $('#reduced-motion').checked = settings.reducedMotion;
+  $('#aura').checked = settings.aura;
+  $('#pet-aura').hidden = !settings.aura;
   $('#pet-scale').value = settings.scale;
   $('#size-label').textContent = `${Math.round(settings.scale * 100)}%`;
   document.body.classList.toggle('reduced-motion', settings.reducedMotion);
@@ -287,8 +289,8 @@ $('#thought-form').addEventListener('submit', async (event) => {
   button.disabled = true;
   try {
     const reply = line(mood);
-    const reaction = chooseAnimation({ neutral: ['thinking', 'nod'], happy: ['giggle', 'smug'],
-      dreamy: ['shy', 'curtsy'], frustrated: ['pout', 'head-shake'], sad: ['head-tilt', 'listen'] }[mood]);
+    const reaction = chooseAnimation({ neutral: ['thinking', 'nod', 'curious-lean'], happy: ['giggle', 'smug', 'happy-sway', 'shoulder-shimmy'],
+      dreamy: ['shy', 'curtsy', 'bashful'], frustrated: ['pout', 'head-shake', 'foot-tap', 'little-stomp'], sad: ['head-tilt', 'listen'] }[mood]);
     await mutate(() => api.addThought({ text, mood }), reply, reaction);
     $('#thought-input').value = '';
   } catch (error) { report(error); }
@@ -314,7 +316,7 @@ $('#export-journal').addEventListener('click', async () => {
   } catch (error) { report(error); }
 });
 
-for (const [selector, setting] of [['#always-on-top', 'alwaysOnTop'], ['#roaming', 'roaming'], ['#reduced-motion', 'reducedMotion'], ['#pet-scale', 'scale']]) {
+for (const [selector, setting] of [['#always-on-top', 'alwaysOnTop'], ['#roaming', 'roaming'], ['#aura', 'aura'], ['#reduced-motion', 'reducedMotion'], ['#pet-scale', 'scale']]) {
   $(selector).addEventListener('change', async (event) => {
     const value = setting === 'scale' ? Number(event.target.value) : event.target.checked;
     try { await mutate(() => api.updateSettings({ [setting]: value })); }
@@ -418,7 +420,7 @@ async function checkDailyGreeting() {
     companion.greeting = greeting;
     showGreeting(greeting);
     if (greeting.isNew) {
-      const reaction = greeting.kind === 'task' ? chooseAnimation(['beckon', 'smug']) : chooseAnimation(['wave', 'curtsy']);
+      const reaction = greeting.kind === 'task' ? chooseAnimation(['beckon', 'smug', 'proud-stance']) : chooseAnimation(['wave', 'curtsy', 'royal-wave', 'bow', 'double-wave']);
       animator.play(reaction);
       if (!panelOpen) speak(greeting.text, reaction, 9000);
       else if (tab === 'chat' && !pendingChat) scrollChat();
@@ -511,11 +513,11 @@ $('#chat-form').addEventListener('submit', async (event) => {
   try {
     const response = await api.chat({ text: userText, requestId: request.id });
     companion.history = response.history;
-    let reactions = ['happy', 'nod', 'smug'];
+    let reactions = ['happy', 'nod', 'smug', 'happy-sway', 'head-bob', 'curious-lean'];
     if (/\b(tired|sad|lonely|rough|exhausted|long day|upset|overwhelmed)\b/i.test(userText)) reactions = ['head-tilt', 'listen'];
-    else if (/\b(blush|romance|daydream)\b/i.test(response.message.text)) reactions = ['shy', 'curtsy'];
+    else if (/\b(blush|romance|daydream)\b/i.test(response.message.text)) reactions = ['shy', 'curtsy', 'bashful', 'air-kiss'];
     else if (/\b(hehe|haha|giggle)\b/i.test(response.message.text)) reactions = ['giggle', 'smug'];
-    else if (/\b(finished|completed|did it|proud)\b/i.test(userText)) reactions = ['fist-pump', 'excited'];
+    else if (/\b(finished|completed|did it|proud)\b/i.test(userText)) reactions = ['fist-pump', 'excited', 'proud-stance', 'delighted-hop'];
     const reaction = chooseAnimation(reactions);
     if (!panelOpen && !request.stopped) speak(response.message.text, reaction, 9000);
     else if (!request.stopped) animator.play(reaction, { duration: 2200 });
@@ -635,7 +637,7 @@ $('#pet-button').addEventListener('click', (event) => {
 setInterval(async () => {
   if (!state || document.hidden || pendingChat || roaming || drag || panelOpen || petHovered || state.settings.reducedMotion || Date.now() - lastInteraction < 25000) return;
   if (!state.settings.roaming) {
-    const idleReactions = ['look-around', 'head-tilt', 'stretch', 'ear-twitch', 'doze', 'thinking', 'smug', 'tiptoe', 'yawn'];
+    const idleReactions = ['look-around', 'head-tilt', 'stretch', 'ear-twitch', 'doze', 'thinking', 'smug', 'tiptoe', 'yawn', 'foot-tap', 'peekaboo', 'ear-perk', 'happy-sway', 'shoulder-shimmy', 'head-bob', 'curious-lean', 'proud-stance', 'sleepy-sway'];
     if (animator.currentState === 'idle') animator.play(chooseAnimation(idleReactions));
     return;
   }
@@ -663,7 +665,7 @@ async function initialize() {
   if (!api) throw new Error('Please launch Kuromi Desktop.exe or use npm start. This companion needs its desktop shell.');
   $('#panel').classList.add('busy');
   try {
-    state = await api.load();
+    [state, companion] = await Promise.all([api.load(), api.getSavedCompanion()]);
     render();
     renderCompanion();
     selectTab('chat');
@@ -672,12 +674,9 @@ async function initialize() {
     animator.play('wave');
     document.body.dataset.ready = 'true';
   } finally { $('#panel').classList.remove('busy'); }
-  // Show saved conversations before waiting for the local model connection.
-  try {
-    companion = await api.getSavedCompanion();
-    renderCompanion();
-    companion = await api.getCompanion();
-  }
+  await api.workspaceReady();
+  // Saved records are visible before attempting the local model connection.
+  try { companion = await api.getCompanion(); }
   catch (error) {
     companion.warning = 'The conversation could not be loaded. Your to-dos and diary are ready to use.';
     console.error('Local conversation:', error.message);
@@ -688,9 +687,15 @@ async function initialize() {
   }
   checkDailyGreeting();
 }
-initialize().catch(report);
+initialize().catch((error) => {
+  report(error);
+  api?.startupFailed().catch(console.error);
+});
 setInterval(checkDailyGreeting, 60000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) checkDailyGreeting(); });
+document.addEventListener('visibilitychange', () => {
+  $('#pet-aura').classList.toggle('paused', document.hidden);
+  if (!document.hidden) checkDailyGreeting();
+});
 const surfaceObserver = new ResizeObserver(scheduleSurface);
 ['#panel', '#hover-card', '#pet-button'].forEach((selector) => surfaceObserver.observe($(selector)));
 window.addEventListener('resize', scheduleSurface);

@@ -4,6 +4,8 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('kuromi', Object.freeze({
   load: () => ipcRenderer.invoke('kuromi:load'),
+  workspaceReady: () => ipcRenderer.invoke('kuromi:workspace-ready'),
+  startupFailed: () => ipcRenderer.invoke('kuromi:startup-failed'),
   getStartup: () => ipcRenderer.invoke('kuromi:get-startup'),
   setStartup: (enabled) => ipcRenderer.invoke('kuromi:set-startup', enabled),
   loadModel: () => ipcRenderer.invoke('kuromi:load-model'),

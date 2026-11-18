@@ -23,6 +23,14 @@ export const ANIMATIONS = Object.freeze({
   smug: behavior(3600, 'Naturally, I knew that'), beckon: behavior(3200, 'Come on. Chop chop'),
   tiptoe: behavior(4200, 'Plotting a tiny escape'), curtsy: behavior(3200, 'You may applaud now'),
   yawn: behavior(4800, 'Mischief is exhausting'), 'fist-pump': behavior(2800, 'I knew you could do it'),
+  'air-kiss': behavior(3600, 'A kiss. You earned it'), 'royal-wave': behavior(4200, 'Your queen has arrived'),
+  'happy-sway': behavior(4800, 'Feeling rather pleased'), 'foot-tap': behavior(3600, 'I am waiting, you know'),
+  peekaboo: behavior(3600, 'Were you looking for me?'), 'ear-perk': behavior(2400, 'Now you have my attention'),
+  bashful: behavior(4200, 'Stop. You are making me blush'), bow: behavior(3200, 'I will take my applause now'),
+  'shoulder-shimmy': behavior(4000, 'A little attitude in every step'), 'double-wave': behavior(3600, 'Yes, both hands. You are welcome'),
+  'head-bob': behavior(3600, 'I have excellent taste in music'), 'curious-lean': behavior(4000, 'What are you plotting over there?'),
+  'proud-stance': behavior(3800, 'Naturally, we make a brilliant team'), 'sleepy-sway': behavior(5200, 'Just resting my eyes for a moment'),
+  'little-stomp': behavior(3000, 'Hmph. I said what I said'), 'delighted-hop': behavior(3400, 'That deserves a tiny celebration'),
 });
 
 export function applyRigPose(rig, pose) {
